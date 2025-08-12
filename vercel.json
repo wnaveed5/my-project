@@ -2,26 +2,26 @@
   "version": 2,
   "builds": [
     {
-      "src": "gimbooks-purchase-order.html",
+      "src": "index.html",
       "use": "@vercel/static"
     },
     {
-      "src": "dist/output.css",
+      "src": "js/**",
       "use": "@vercel/static"
     },
     {
-      "src": "src/input.css",
+      "src": "styles/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "templates/**",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/",
-      "dest": "/gimbooks-purchase-order.html"
-    },
-    {
-      "src": "/css/(.*)",
-      "dest": "/dist/$1"
+      "dest": "/index.html"
     }
   ],
   "outputDirectory": ".",
