@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+.editable-field {
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    cursor: text;
+    min-width: 120px;
+}
+
+.editable-field:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.editable-field:focus {
+    outline: none;
+    background: white;
+    border-color: #333333;
+    box-shadow: 0 0 0 2px rgba(51,51,51,0.1);
+}
+
+.editable-field[contenteditable="true"]:empty::before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.section-header {
+    background: #333333;
+    color: white;
+    padding: 8px 12px;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+}

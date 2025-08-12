@@ -1,0 +1,19 @@
+{
+  "name": "gimbooks-purchase-order",
+  "version": "1.0.0",
+  "description": "Purchase Order application with Tailwind CSS",
+  "main": "gimbooks-purchase-order.html",
+  "scripts": {
+    "build": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
+    "build:prod": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify",
+    "dev": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32"
+  },
+  "keywords": ["purchase-order", "tailwindcss", "html"],
+  "author": "",
+  "license": "MIT"
+}
