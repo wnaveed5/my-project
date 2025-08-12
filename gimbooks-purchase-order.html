@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
+<?xml version="1.0"?>
+<!DOCTYPE pdf PUBLIC "-//big.faceless.org//report" "report-1.1.dtd">
+<pdf>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Purchase Order</title>
-            <link href="./dist/output.css?v=1.0.2" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -28,6 +23,48 @@
             border-radius: 8px;
             overflow: hidden;
         }
+        
+        /* Custom styles for editable fields */
+        .editable-field {
+            background: transparent;
+            border: 1px solid transparent;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            cursor: text;
+            min-width: 120px;
+        }
+
+        .editable-field:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .editable-field:focus {
+            outline: none;
+            background: white;
+            border-color: #333333;
+            box-shadow: 0 0 0 2px rgba(51,51,51,0.1);
+        }
+
+        .editable-field[contenteditable="true"]:empty::before {
+            content: attr(data-placeholder);
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .section-header {
+            background: #333333;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+
+
+
     </style>
 </head>
 <body>
@@ -328,16 +365,28 @@
                                                 <td style="text-align: right; padding: 5px 0; color: #000000;"><span class="editable-field" contenteditable="true" data-placeholder="">0.00</span></td>
                                             </tr>
                                             <tr>
-                                                <td colspan="2" style="padding-top: 15px;">
-                                                    <div style="text-align: center; color: #000000;">
-                                                        TOTAL: $<span class="editable-field" contenteditable="true" data-placeholder="">457.73</span>
-                                                    </div>
-                                                </td>
+                                                                        <td colspan="2" style="padding-top: 15px;">
+                            <table style="width: 100%; text-align: center; color: #000000;">
+                                <tr>
+                                    <td>TOTAL: $<span class="editable-field total-field" contenteditable="true" data-placeholder="">457.73</span></td>
+                                </tr>
+                            </table>
+                        </td>
                                             </tr>
                                         </table>
                                     </td>
                                 </tr>
                             </table>
+                        </td>
+                    </tr>
+                </table>
+                
+                <!-- Contact Information Section -->
+                <table style="width: 100%; margin-bottom: 30px; border-top: 2px solid #333333; padding-top: 20px;">
+                    <tr>
+                        <td style="text-align: center; padding: 20px;">
+                            <strong>Contact Information:</strong><br />
+                            <span class="editable-field" contenteditable="true" data-placeholder="Enter contact information here">For questions about this purchase order, please contact the procurement department at (555) 123-4567 or email procurement@testcompany.com</span>
                         </td>
                     </tr>
                 </table>
@@ -356,8 +405,10 @@
                                 cursor: pointer;
                                 transition: background 0.3s ease;
                             " onmouseover="this.style.background='#555555'" onmouseout="this.style.background='#333333'">
-                                🔄 Convert to NetSuite XML
+                                Convert to NetSuite XML
                             </button>
+                            
+
                         </td>
                     </tr>
                 </table>
@@ -392,7 +443,7 @@
                                 padding: 8px 16px;
                                 border-radius: 4px;
                                 cursor: pointer;
-                            ">✕ Close</button>
+                            ">Close</button>
                         </div>
                         
                         <div style="margin-bottom: 20px;">
@@ -402,9 +453,8 @@
                                 border: none;
                                 padding: 8px 16px;
                                 border-radius: 4px;
-                                cursor: pointer;
                                 margin-right: 10px;
-                            ">📋 Copy XML</button>
+                            ">Copy XML</button>
                             <button onclick="downloadXml()" style="
                                 background: #999999;
                                 color: white;
@@ -412,7 +462,7 @@
                                 padding: 8px 16px;
                                 border-radius: 4px;
                                 cursor: pointer;
-                            ">💾 Download XML</button>
+                            ">Download XML</button>
                         </div>
                         
                         <div style="
@@ -429,7 +479,7 @@
                         " id="xmlOutput"></div>
                         
                         <div style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 4px; border-left: 4px solid #333333;">
-                            <h4 style="margin: 0 0 10px 0; color: #000000;">📖 NetSuite Integration Guide</h4>
+                            <h4 style="margin: 0 0 10px 0; color: #000000;">NetSuite Integration Guide</h4>
                             <ol style="margin: 0; padding-left: 20px; color: #000000;">
                                 <li>Copy the XML above using the "Copy XML" button</li>
                                 <li>Open NetSuite Advanced PDF/HTML Templates</li>
@@ -527,12 +577,12 @@
             comments: 'td[style*="width: 70%"] .editable-field',
             
             // Footer Contact
-            contactInfo: 'table[style*="border-top: 2px solid #22c55e"] .editable-field'
+            contactInfo: 'td[style*="border-top: 2px solid #333333"] .editable-field'
         };
 
         // Field validation function - now shows field status without blocking conversion
         function validateAllFields() {
-            console.group('🔍 Field Validation Check');
+            console.group('Field Validation Check');
             const validationResults = {};
             let filledCount = 0;
             let emptyCount = 0;
@@ -551,7 +601,7 @@
                 
                 if (isEmpty) {
                     emptyCount++;
-                    console.log(`⚪ ${fieldName}: EMPTY`);
+                    console.log(`${fieldName}: EMPTY`);
                     // Remove any highlighting from empty fields
                     if (element) {
                         element.style.backgroundColor = '';
@@ -559,7 +609,7 @@
                     }
                 } else {
                     filledCount++;
-                    console.log(`✅ ${fieldName}: "${value}"`);
+                    console.log(`${fieldName}: "${value}"`);
                     // Remove any highlighting from filled fields
                     if (element) {
                         element.style.backgroundColor = '';
@@ -570,7 +620,7 @@
             
             console.groupEnd();
             
-            const message = `📊 Field Status:\n\n✅ Filled: ${filledCount}\n⚪ Empty: ${emptyCount}\n\nYou can convert to XML with partially filled fields.`;
+            const message = `Field Status:\n\nFilled: ${filledCount}\nEmpty: ${emptyCount}\n\nYou can convert to XML with partially filled fields.`;
             alert(message);
             
             return true; // Always return true to allow conversion
@@ -616,30 +666,14 @@
             // Add click handler for convert button
             document.getElementById('convertToXmlBtn').addEventListener('click', convertToXml);
 
-            // Add loading indicators and auto-calculation to all editable fields
+            // Add auto-calculation to all editable fields
             editableFields.forEach(field => {
-                // Add loading indicator
-                const loadingSpinner = document.createElement('span');
-                loadingSpinner.className = 'loading-spinner';
-                loadingSpinner.innerHTML = '◐';
-                loadingSpinner.style.cssText = `
-                    display: none;
-                    margin-left: 5px;
-                    color: #333333;
-                    font-size: 14px;
-                    animation: spin 1s linear infinite;
-                `;
-                field.parentNode.appendChild(loadingSpinner);
-
                 // Store the original input and blur handlers
                 const originalInputHandler = field.oninput;
                 const originalBlurHandler = field.onblur;
 
                 // Enhanced input handler that combines original functionality with new features
                 field.addEventListener('input', function(e) {
-                    // Show loading spinner
-                    loadingSpinner.style.display = 'inline';
-                    
                     // Call original input handler if it exists
                     if (originalInputHandler) {
                         originalInputHandler.call(this, e);
@@ -665,11 +699,6 @@
                             updateAllTotals();
                         }
                     }
-
-                    // Hide loading spinner after a short delay
-                    setTimeout(() => {
-                        loadingSpinner.style.display = 'none';
-                    }, 500);
                 });
 
                 // Enhanced blur handler that combines original functionality with new features
@@ -699,26 +728,13 @@
                 });
             });
 
-            // Add CSS animation for loading spinner
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-                .loading-spinner {
-                    font-size: 12px;
-                }
-            `;
-            document.head.appendChild(style);
-
             // Initialize totals on page load
             updateAllTotals();
         });
         
         // Generate XML from current form data using the centralized field mapping
         function generateXml() {
-            console.group('🔧 XML Generation - Field Mapping');
+            console.group('XML Generation - Field Mapping');
             
             // Extract all field values using the centralized FIELD_MAPPING
             const fieldValues = {};
@@ -732,10 +748,10 @@
             console.groupEnd();
             
             // Get line items (using the existing function)
-            console.group('📋 Getting Line Items for XML');
+            console.group('Getting Line Items for XML');
             const lineItems = getLineItems();
-            console.log('📄 Line Items HTML received:', lineItems);
-            console.log('📏 Line Items length:', lineItems.length);
+            console.log('Line Items HTML received:', lineItems);
+            console.log('Line Items length:', lineItems.length);
             console.groupEnd();
             
             // Create comprehensive NetSuite XML
@@ -826,7 +842,7 @@
 </head>
 <body header="nlheader" header-height="10%" footer="nlfooter" footer-height="20pt" padding="0.5in 0.5in 0.5in 0.5in" size="Letter">
     <!-- Vendor and Ship To Section -->
-    <table style="width: 100%; margin-bottom: 20px;">
+    <table style="width: 100%; margin-bottom: 30px;">
         <tr>
             <td style="width: 50%; padding-right: 10px; vertical-align: top;">
                 <table style="width: 100%; border: 1px solid #e5e7eb;">
@@ -910,10 +926,14 @@
     <table style="width: 100%; margin-bottom: 20px;">
         <tr>
             <td style="width: 70%;">
-                <div style="margin-bottom: 10px;">
-                    <strong>Comments:</strong><br />
-                    ${fieldValues.comments}
-                </div>
+                <table style="width: 100%; margin-bottom: 10px;">
+                    <tr>
+                        <td><strong>Comments:</strong></td>
+                    </tr>
+                    <tr>
+                        <td>${fieldValues.comments}</td>
+                    </tr>
+                </table>
             </td>
             <td style="width: 30%;">
                 <table style="width: 100%;">
@@ -959,24 +979,24 @@
         
         // Get line items directly from the table structure (more reliable)
         function getLineItems() {
-            console.group('📋 Line Items Generation - Direct Table Reading');
+            console.group('Line Items Generation - Direct Table Reading');
             let lineItemsHtml = '';
             
             const table = document.querySelector('table.itemtable');
             if (!table) {
-                console.error('❌ Line item table not found!');
+                console.error('Line item table not found!');
                 console.groupEnd();
                 return '';
             }
             
             // Use tbody rows only (skip thead)
             const tbodyRows = table.querySelectorAll('tbody tr');
-            console.log(`📊 Total tbody rows found: ${tbodyRows.length}`);
+            console.log(`Total tbody rows found: ${tbodyRows.length}`);
             
             // Process all tbody rows
             tbodyRows.forEach((row, index) => {
                 const cells = row.querySelectorAll('td');
-                console.log(`🔍 Row ${index + 1}: Found ${cells.length} cells`);
+                console.log(`Row ${index + 1}: Found ${cells.length} cells`);
                 
                 if (cells.length >= 5) {
                     // Extract values from the NEW column positions
@@ -986,7 +1006,7 @@
                     const unitPrice = cells[3]?.querySelector('.editable-field')?.textContent.trim() || ''; // Column 4: Unit Price
                     const totalPrice = cells[4]?.querySelector('.editable-field')?.textContent.trim() || ''; // Column 5: Total Price
                     
-                    console.log(`📋 Row ${index + 1} Data:`);
+                    console.log(`Row ${index + 1} Data:`);
                     console.log(`  Item#: "${itemNumber}"`);
                     console.log(`  Description: "${description}"`);
                     console.log(`  Qty: "${qty}"`);
@@ -1003,27 +1023,29 @@
             <td style="padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: right;">$${unitPrice}</td>
             <td style="padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: right;">$${totalPrice}</td>
         </tr>`;
-                        console.log(`✅ Added line item ${index + 1} to XML`);
+                        console.log(`Added line item ${index + 1} to XML`);
                     } else {
-                        console.log(`⚪ Skipped empty row ${index + 1}`);
+                        console.log(`Skipped empty row ${index + 1}`);
                     }
                 } else {
-                    console.warn(`⚠️ Row ${index + 1}: Insufficient cells (${cells.length})`);
+                    console.warn(`Row ${index + 1}: Insufficient cells (${cells.length})`);
                 }
             });
             
-            console.log(`📋 Total line items generated: ${lineItemsHtml.split('<tr>').length - 1}`);
-            console.log(`📄 Final XML HTML:`, lineItemsHtml);
+            console.log(`Total line items generated: ${lineItemsHtml.split('<tr>').length - 1}`);
+            console.log(`Final XML HTML:`, lineItemsHtml);
             console.groupEnd();
             return lineItemsHtml;
         }
         
         // Calculate subtotal from line items
         function calculateSubtotal() {
-            console.group('🧮 CALCULATING SUBTOTAL');
+            console.group('CALCULATING SUBTOTAL');
             
             const totalCells = document.querySelectorAll('table.itemtable tbody tr td:last-child .editable-field');
-            console.log(`📊 Found ${totalCells.length} total price cells`);
+            console.log(`Found ${totalCells.length} total price cells`);
+            console.log(`DEBUG: Total cells selector: 'table.itemtable tbody tr td:last-child .editable-field'`);
+            console.log(`DEBUG: Total cells found:`, totalCells);
             
             let subtotal = 0;
             let rowCount = 0;
@@ -1038,66 +1060,85 @@
             });
             
             const finalSubtotal = subtotal.toFixed(2);
-            console.log(`🎯 FINAL SUBTOTAL: ${subtotal} → ${finalSubtotal}`);
+            console.log(`FINAL SUBTOTAL: ${subtotal} → ${finalSubtotal}`);
             console.groupEnd();
             return finalSubtotal;
         }
 
         // Calculate total including tax, shipping, and other
         function calculateTotal() {
-            console.group('🧮 CALCULATING TOTAL');
+            console.group('CALCULATING TOTAL');
             
             const subtotal = parseFloat(calculateSubtotal()) || 0;
-            console.log(`📊 Subtotal: ${subtotal}`);
+            console.log(`Subtotal: ${subtotal}`);
             
             // Find tax, shipping, and other fields by looking for text content
             const allCells = document.querySelectorAll('td');
             let tax = 0, shipping = 0, other = 0;
             
-            allCells.forEach(cell => {
-                if (cell.textContent.includes('TAX:')) {
+            console.log(`DEBUG: Searching through ${allCells.length} cells for tax, shipping, and other fields...`);
+            
+            allCells.forEach((cell, index) => {
+                const cellText = cell.textContent.trim();
+                console.log(`DEBUG: Cell ${index}: "${cellText}"`);
+                
+                if (cellText.includes('TAX:')) {
+                    console.log(`DEBUG: Found TAX cell at index ${index}`);
                     const taxField = cell.nextElementSibling?.querySelector('.editable-field');
+                    console.log(`DEBUG: Tax field element:`, taxField);
                     if (taxField) {
                         const rawTax = taxField.textContent.trim();
                         tax = parseFloat(rawTax.replace(/[$,]/g, '')) || 0;
-                        console.log(`💰 Tax: "${rawTax}" → ${tax}`);
+                        console.log(`Tax: "${rawTax}" → ${tax}`);
+                    } else {
+                        console.log(`DEBUG: No tax field found after TAX: cell`);
                     }
-                } else if (cell.textContent.includes('SHIPPING:')) {
+                } else if (cellText.includes('SHIPPING:')) {
+                    console.log(`DEBUG: Found SHIPPING cell at index ${index}`);
                     const shippingField = cell.nextElementSibling?.querySelector('.editable-field');
+                    console.log(`DEBUG: Shipping field element:`, shippingField);
                     if (shippingField) {
                         const rawShipping = shippingField.textContent.trim();
                         shipping = parseFloat(rawShipping.replace(/[$,]/g, '')) || 0;
-                        console.log(`🚚 Shipping: "${rawShipping}" → ${shipping}`);
+                        console.log(`Shipping: "${rawShipping}" → ${shipping}`);
+                    } else {
+                        console.log(`DEBUG: No shipping field found after SHIPPING: cell`);
                     }
-                } else if (cell.textContent.includes('OTHER:')) {
+                } else if (cellText.includes('OTHER:')) {
+                    console.log(`DEBUG: Found OTHER cell at index ${index}`);
                     const otherField = cell.nextElementSibling?.querySelector('.editable-field');
+                    console.log(`DEBUG: Other field element:`, otherField);
                     if (otherField) {
                         const rawOther = otherField.textContent.trim();
                         other = parseFloat(rawOther.replace(/[$,]/g, '')) || 0;
-                        console.log(`📝 Other: "${rawOther}" → ${other}`);
+                        console.log(`Other: "${rawOther}" → ${other}`);
+                    } else {
+                        console.log(`DEBUG: No other field found after OTHER: cell`);
                     }
                 }
             });
             
+            console.log(`DEBUG: Final values - Tax: ${tax}, Shipping: ${shipping}, Other: ${other}`);
             const total = subtotal + tax + shipping + other;
-            console.log(`🎯 CALCULATION: ${subtotal} + ${tax} + ${shipping} + ${other} = ${total}`);
-            console.log(`🎯 FINAL TOTAL: ${total.toFixed(2)}`);
+            console.log(`CALCULATION: ${subtotal} + ${tax} + ${shipping} + ${other} = ${total}`);
+            console.log(`FINAL TOTAL: ${total.toFixed(2)}`);
+            console.log(`DEBUG: Expected calculation: 474.75 + 32.98 + 25.00 + 0.00 = 532.73`);
             console.groupEnd();
             return total.toFixed(2);
         }
 
         // Auto-calculate line item amounts when quantity or rate changes
         function calculateLineItemAmount(row) {
-            console.group('🧮 CALCULATING LINE ITEM AMOUNT');
+            console.group('CALCULATING LINE ITEM AMOUNT');
             
             const quantityField = row.querySelector('td:nth-child(3) .editable-field'); // Qty column
             const rateField = row.querySelector('td:nth-child(4) .editable-field'); // Unit Price column
             const amountField = row.querySelector('td:nth-child(5) .editable-field'); // Total Price column
             
-            console.log(`🔍 Fields found:`);
-            console.log(`  Quantity field: ${quantityField ? '✅' : '❌'}`);
-            console.log(`  Rate field: ${rateField ? '✅' : '❌'}`);
-            console.log(`  Amount field: ${amountField ? '✅' : '❌'}`);
+            console.log(`Fields found:`);
+            console.log(`  Quantity field: ${quantityField ? 'Found' : 'Missing'}`);
+            console.log(`  Rate field: ${rateField ? 'Found' : 'Missing'}`);
+            console.log(`  Amount field: ${amountField ? 'Found' : 'Missing'}`);
             
             if (quantityField && rateField && amountField) {
                 const rawQty = quantityField.textContent.trim();
@@ -1107,14 +1148,14 @@
                 const rate = parseFloat(rawRate.replace(/[$,]/g, '')) || 0;
                 const amount = quantity * rate;
                 
-                console.log(`📊 Calculation: "${rawQty}" × "${rawRate}" = ${quantity} × ${rate} = ${amount}`);
+                console.log(`Calculation: "${rawQty}" × "${rawRate}" = ${quantity} × ${rate} = ${amount}`);
                 
                 amountField.textContent = amount.toFixed(2);
-                console.log(`✅ Updated amount field to: ${amount.toFixed(2)}`);
+                console.log(`Updated amount field to: ${amount.toFixed(2)}`);
                 console.groupEnd();
                 return amount;
             } else {
-                console.warn(`⚠️ Missing required fields for calculation`);
+                console.warn(`Missing required fields for calculation`);
                 console.groupEnd();
                 return 0;
             }
@@ -1122,28 +1163,33 @@
 
         // Update all totals when line items change
         function updateAllTotals() {
-            console.group('🔄 UPDATING ALL TOTALS');
+            console.group('UPDATING ALL TOTALS');
             
             // Update subtotal
             const allCells = document.querySelectorAll('td');
             let subtotalField = null, totalField = null;
             
-            console.log(`🔍 Searching for total fields in ${allCells.length} cells...`);
+            console.log(`Searching for total fields in ${allCells.length} cells...`);
             
             allCells.forEach((cell, index) => {
                 const cellText = cell.textContent.trim();
                 if (cellText.includes('SUBTOTAL:')) {
                     subtotalField = cell.nextElementSibling?.querySelector('.editable-field');
-                    console.log(`✅ Found SUBTOTAL field at cell ${index}: "${cellText}"`);
+                    console.log(`Found SUBTOTAL field at cell ${index}: "${cellText}"`);
+                    console.log(`DEBUG: Subtotal field element:`, subtotalField);
                 } else if (cellText.includes('TOTAL:')) {
-                    totalField = cell.nextElementSibling?.querySelector('.editable-field');
-                    console.log(`✅ Found TOTAL field at cell ${index}: "${cellText}"`);
+                    // Look for the total field in the same cell or nearby
+                    totalField = cell.querySelector('.total-field') || 
+                                cell.querySelector('.editable-field') ||
+                                cell.nextElementSibling?.querySelector('.editable-field');
+                    console.log(`Found TOTAL field at cell ${index}: "${cellText}"`);
+                    console.log(`DEBUG: Total field element:`, totalField);
                 }
             });
             
-            console.log(`📊 Fields found:`);
-            console.log(`  Subtotal field: ${subtotalField ? '✅' : '❌'}`);
-            console.log(`  Total field: ${totalField ? '✅' : '❌'}`);
+            console.log(`Fields found:`);
+            console.log(`  Subtotal field: ${subtotalField ? 'Found' : 'Missing'}`);
+            console.log(`  Total field: ${totalField ? 'Found' : 'Missing'}`);
             
             if (subtotalField) {
                 const oldSubtotal = subtotalField.textContent.trim();
@@ -1151,7 +1197,7 @@
                 subtotalField.textContent = newSubtotal;
                 console.log(`🔄 Updated subtotal: "${oldSubtotal}" → "${newSubtotal}"`);
             } else {
-                console.warn(`⚠️ Subtotal field not found!`);
+                console.warn(`Subtotal field not found!`);
             }
             
             if (totalField) {
@@ -1160,7 +1206,7 @@
                 totalField.textContent = newTotal;
                 console.log(`🔄 Updated total: "${oldTotal}" → "${newTotal}"`);
             } else {
-                console.warn(`⚠️ Total field not found!`);
+                console.warn(`Total field not found!`);
             }
             
             console.groupEnd();
@@ -1521,10 +1567,10 @@ ${Array.from(rows).some(row => row.querySelectorAll('.editable-field').length ==
             if (!xmlContent.includes('<?xml version="1.0"?>') || 
                 !xmlContent.includes('<pdf>') ||
                 !xmlContent.includes('</pdf>')) {
-                console.error('Invalid XML structure generated');
-                alert('Error generating XML: Invalid structure');
-                return;
-            }
+                    console.error('Invalid XML structure generated');
+                    alert('Error generating XML: Invalid structure');
+                    return;
+                }
 
             console.log('XML conversion successful');
             
