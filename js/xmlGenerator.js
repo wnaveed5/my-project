@@ -1128,20 +1128,32 @@ window.XML_GENERATOR = {
         // Clean up the contact info text
         let formatted = contactInfo.toString().trim();
         
-        // Handle cases where email and phone are run together
-        // Look for patterns like "email@domain.com or 555-123-4567" or "email@domain.com555-123-4567"
-        const emailPhonePattern = /(\S+@\S+\.\S+)\s*(or\s*)?(\d{3}[-.]?\d{3}[-.]?\d{4})/gi;
+        // Fix spacing issues between words
+        // Replace multiple spaces with single spaces
+        formatted = formatted.replace(/\s+/g, ' ');
         
-        if (emailPhonePattern.test(formatted)) {
-            formatted = formatted.replace(emailPhonePattern, (match, email, orText, phone) => {
-                return `${email}<br/>or ${phone}`;
+        // Handle the specific case: "For inquiries, contact [Name] at [Phone] or [Email]"
+        const contactPattern = /(For inquiries, contact)\s+([^at]+?)\s+at\s+([^or]+?)\s+or\s+(.+)/i;
+        if (contactPattern.test(formatted)) {
+            formatted = formatted.replace(contactPattern, (match, prefix, name, phone, email) => {
+                return `${prefix} ${name.trim()}<br/>at ${phone.trim()}<br/>or ${email.trim()}`;
             });
         } else {
-            // Look for standalone phone numbers that should be on a new line
-            // Pattern for phone numbers at the end of text
-            const phoneAtEndPattern = /(.+)\s+(\d{3}[-.]?\d{3}[-.]?\d{4})$/;
-            if (phoneAtEndPattern.test(formatted)) {
-                formatted = formatted.replace(phoneAtEndPattern, '$1<br/>$2');
+            // Handle cases where email and phone are run together
+            // Look for patterns like "email@domain.com or 555-123-4567" or "email@domain.com555-123-4567"
+            const emailPhonePattern = /(\S+@\S+\.\S+)\s*(or\s*)?(\d{3}[-.]?\d{3}[-.]?\d{4})/gi;
+            
+            if (emailPhonePattern.test(formatted)) {
+                formatted = formatted.replace(emailPhonePattern, (match, email, orText, phone) => {
+                    return `${email}<br/>or ${phone}`;
+                });
+            } else {
+                // Look for standalone phone numbers that should be on a new line
+                // Pattern for phone numbers at the end of text
+                const phoneAtEndPattern = /(.+)\s+(\d{3}[-.]?\d{3}[-.]?\d{4})$/;
+                if (phoneAtEndPattern.test(formatted)) {
+                    formatted = formatted.replace(phoneAtEndPattern, '$1<br/>$2');
+                }
             }
         }
         
