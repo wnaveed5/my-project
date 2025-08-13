@@ -24,6 +24,10 @@
   ],
   "routes": [
     {
+      "src": "/api/chatgpt",
+      "dest": "/api/chatgpt.js"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },
