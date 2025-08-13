@@ -3,11 +3,25 @@ class ChatGPTGenerator {
     constructor() {
         this.apiKey = null;
         this.isConfigured = false;
-        this.apiUrl = 'https://api.openai.com/v1/chat/completions';
         this.model = 'gpt-3.5-turbo';
         
-        // Load API key from config
-        this.loadApiKey();
+        // Check if we're on Vercel (production) or local development
+        this.isVercel = window.location.hostname.includes('vercel.app') || 
+                        window.location.hostname.includes('vercel.com') ||
+                        window.location.hostname !== 'localhost' && 
+                        window.location.hostname !== '127.0.0.1' &&
+                        !window.location.protocol.includes('file');
+        
+        if (this.isVercel) {
+            // On Vercel, use the serverless function
+            this.apiUrl = '/api/chatgpt';
+            this.isConfigured = true;
+            console.log('✅ ChatGPT configured for Vercel deployment - using serverless function');
+        } else {
+            // Local development - use direct API calls
+            this.apiUrl = 'https://api.openai.com/v1/chat/completions';
+            this.loadApiKey();
+        }
     }
 
     // Load API key from config
@@ -137,21 +151,29 @@ Use proper JSON field names matching this structure:
         console.log('🤖 Calling ChatGPT API...');
 
         try {
+            let headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            let requestBody = {
+                model: this.model,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                max_tokens: 2000,
+                temperature: 0.7
+            };
+            
+            // Add Authorization header only for local development
+            if (!this.isVercel) {
+                headers['Authorization'] = `Bearer ${this.apiKey}`;
+            }
+            
             const response = await fetch(this.apiUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`
-                },
-                body: JSON.stringify({
-                    model: this.model,
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        { role: 'user', content: userPrompt }
-                    ],
-                    max_tokens: 2000,
-                    temperature: 0.7
-                })
+                headers: headers,
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
