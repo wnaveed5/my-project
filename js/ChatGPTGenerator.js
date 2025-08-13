@@ -6,20 +6,26 @@ class ChatGPTGenerator {
         this.model = 'gpt-3.5-turbo';
         
         // Check if we're on Vercel (production) or local development
-        this.isVercel = window.location.hostname.includes('vercel.app') || 
-                        window.location.hostname.includes('vercel.com') ||
-                        window.location.hostname !== 'localhost' && 
-                        window.location.hostname !== '127.0.0.1' &&
-                        !window.location.protocol.includes('file');
+        const hostname = window.location.hostname;
+        const port = window.location.port;
+        const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+        const hasPort = port && port !== '80' && port !== '443';
+        
+        // More explicit Vercel detection - only true if actually on Vercel domains
+        this.isVercel = (hostname.includes('vercel.app') || hostname.includes('vercel.com')) 
+                       && !isLocalhost && !hasPort;
+        
+        // Environment detection complete
         
         if (this.isVercel) {
             // On Vercel, use the serverless function
             this.apiUrl = '/api/chatgpt';
             this.isConfigured = true;
-            console.log('✅ ChatGPT configured for Vercel deployment - using serverless function');
+            console.log('✅ ChatGPT configured for Vercel deployment');
         } else {
             // Local development - use direct API calls
             this.apiUrl = 'https://api.openai.com/v1/chat/completions';
+            console.log('✅ ChatGPT configured for local development');
             this.loadApiKey();
         }
     }
@@ -274,6 +280,14 @@ Use proper JSON field names matching this structure:
                             }
                             element.textContent = cleanValue;
                             console.log(`✓ Set ${fieldName}: ${cleanValue}`);
+                            
+                            // Debug: Verify the field actually contains the value
+                            setTimeout(() => {
+                                const currentValue = element.textContent;
+                                if (currentValue !== cleanValue) {
+                                    console.warn(`⚠️ Field ${fieldName} value changed! Set: "${cleanValue}" → Current: "${currentValue}"`);
+                                }
+                            }, 100);
                         } else {
                             console.warn(`⚠️ Element not found for ${fieldName} with selector: ${selector}`);
                         }

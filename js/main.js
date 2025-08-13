@@ -99,9 +99,14 @@ function initializeAllFeatures() {
     // Initialize event listeners
     initializeEventListeners();
     
-    // Initialize color picker
-    console.log('🎨 About to initialize color picker...');
-    initializeColorPicker();
+    // Initialize header color picker
+    console.log('🎨 About to initialize header color picker...');
+    if (window.HeaderColorPicker) {
+        new window.HeaderColorPicker();
+        console.log('✅ Header color picker initialized');
+    } else {
+        console.warn('⚠️ HeaderColorPicker not available');
+    }
     
     // Skip local data generator - using ChatGPT only
     
@@ -110,17 +115,7 @@ function initializeAllFeatures() {
     
     console.log('✅ All features initialized');
     
-    // Force color picker after a short delay as fallback
-    setTimeout(() => {
-        if (!document.querySelector('.color-picker-container')) {
-            console.log('🎨 Color picker not found, forcing vanilla version...');
-            if (window.mountVanillaColorPicker) {
-                window.mountVanillaColorPicker();
-            } else {
-                console.error('❌ mountVanillaColorPicker function not available');
-            }
-        }
-    }, 1000);
+
 }
 
 // Initialize editable fields with event handlers
@@ -195,36 +190,7 @@ function initializeEventListeners() {
     console.log('✅ Event listeners initialized');
 }
 
-// Initialize the color picker component
-function initializeColorPicker() {
-    console.log('🎨 Initializing color picker...');
-    
-    // Try React first
-    if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined' && window.mountColorPicker) {
-        console.log('✅ React is available, trying React color picker...');
-        
-        const colorPickerRoot = document.getElementById('color-picker-root');
-        if (colorPickerRoot) {
-            try {
-                window.mountColorPicker();
-                console.log('✅ React color picker initialized');
-                return;
-            } catch (error) {
-                console.warn('⚠️ React color picker failed, falling back to vanilla:', error);
-            }
-        }
-    }
-    
-    // Fallback to vanilla JavaScript
-    console.log('🎨 Using vanilla JavaScript color picker...');
-    if (window.mountVanillaColorPicker) {
-        window.mountVanillaColorPicker();
-        console.log('✅ Vanilla color picker initialized');
-    } else {
-        console.warn('⚠️ Vanilla color picker not available, retrying...');
-        setTimeout(initializeColorPicker, 100);
-    }
-}
+
 
 // Data generator functions removed - using ChatGPT only
 
@@ -355,14 +321,25 @@ function checkModuleAvailability() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🌐 DOM loaded, checking module availability...');
     
-    // Check if all required modules are available
-    if (checkModuleAvailability()) {
-        console.log('✅ All modules available, initializing application...');
-        initializeApp();
-    } else {
-        console.error('❌ Required modules not available');
-        showError('Required modules not loaded. Please check the console for errors.');
-    }
+    // Add a small delay to ensure all scripts have finished loading
+    setTimeout(() => {
+        // Check if all required modules are available
+        if (checkModuleAvailability()) {
+            console.log('✅ All modules available, initializing application...');
+            initializeApp();
+        } else {
+            console.error('❌ Required modules not available');
+            // List what's actually available for debugging
+            console.log('🔍 Available modules:', {
+                UTILS: !!window.UTILS,
+                DRAG_AND_DROP: !!window.DRAG_AND_DROP,
+                CALCULATIONS: !!window.CALCULATIONS,
+                XML_GENERATOR: !!window.XML_GENERATOR,
+                CHATGPT_GENERATOR: !!window.CHATGPT_GENERATOR
+            });
+            showError('Required modules not loaded. Please check the console for errors.');
+        }
+    }, 100);
 });
 
 // Export main functionality
@@ -371,7 +348,6 @@ window.MAIN_APP = {
     loadTemplates,
     loadPurchaseOrderForm,
     initializeAllFeatures,
-    initializeColorPicker,
     initializeChatGPTGenerator,
     showError,
     showSuccess,

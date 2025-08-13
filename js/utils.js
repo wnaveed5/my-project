@@ -2,33 +2,33 @@
 
 // Dynamic field mapping that survives DOM rearrangement
 const FIELD_MAPPING = {
-    // Use special functions instead of static selectors for robustness
-    companyName: 'dynamic:findFieldByLabel:Company Name:company-info',
-    companyAddress: 'dynamic:findFieldByLabel:Street Address:company-info', 
-    companyCityState: 'dynamic:findFieldByLabel:City, ST ZIP:company-info',
-    companyPhone: 'dynamic:findFieldByLabel:Phone:company-info',
-    companyFax: 'dynamic:findFieldByLabel:Fax:company-info',
-    companyWebsite: 'dynamic:findFieldByLabel:Website:company-info',
+    // Company Information (using unique IDs - no more label confusion!)
+    companyName: '#company-name',
+    companyAddress: '#company-address', 
+    companyCityState: '#company-city-state',
+    companyPhone: '#company-phone',
+    companyFax: '#company-fax',
+    companyWebsite: '#company-website',
     
-    // PO Details
-    poDate: 'dynamic:findFieldByLabel:DATE:purchase-order',
-    poNumber: 'dynamic:findFieldByLabel:PO #:purchase-order',
+    // PO Details (using unique IDs)
+    poDate: '#po-date',
+    poNumber: '#po-number',
     
-    // Vendor Section (using dynamic label-based mapping)
-    vendorCompany: 'dynamic:findFieldByLabel:Company Name:vendor',
-    vendorContact: 'dynamic:findFieldByLabel:Contact or Department:vendor',
-    vendorAddress: 'dynamic:findFieldByLabel:Street Address:vendor',
-    vendorCityState: 'dynamic:findFieldByLabel:City, ST ZIP:vendor',
-    vendorPhone: 'dynamic:findFieldByLabel:Phone:vendor',
-    vendorFax: 'dynamic:findFieldByLabel:Fax:vendor',
+    // Vendor Section (using unique IDs)
+    vendorCompany: '#vendor-company',
+    vendorContact: '#vendor-contact',
+    vendorAddress: '#vendor-address',
+    vendorCityState: '#vendor-city-state',
+    vendorPhone: '#vendor-phone',
+
     
-    // Ship To Section (using dynamic label-based mapping)
-    shipToName: 'dynamic:findFieldByLabel:Name:ship-to',
-    shipToCompany: 'dynamic:findFieldByLabel:Company Name:ship-to',
-    shipToAddress: 'dynamic:findFieldByLabel:Street Address:ship-to',
-    shipToCityState: 'dynamic:findFieldByLabel:City, ST ZIP:ship-to',
-    shipToPhone: 'dynamic:findFieldByLabel:Phone:ship-to',
-    shipToFax: 'dynamic:findFieldByLabel:Fax:ship-to',
+    // Ship To Section (using unique IDs)
+    shipToName: '#ship-to-name',
+    shipToCompany: '#ship-to-company',
+    shipToAddress: '#ship-to-address',
+    shipToCityState: '#ship-to-city-state',
+    shipToPhone: '#ship-to-phone',
+
     
     // Shipping Details - Updated for single row layout
     requisitioner: 'table.shipping-details tr:nth-child(2) td:nth-child(1) .editable-field',
@@ -67,15 +67,15 @@ const FIELD_MAPPING = {
     lineItem5Rate: 'table.itemtable tbody tr:nth-child(5) td:nth-child(5) .editable-field',
     lineItem5Amount: 'table.itemtable tbody tr:nth-child(5) td:nth-child(6) .editable-field',
     
-    // Totals Section - Dynamic selectors that work with drag and drop
-    subtotal: 'dynamic:findFieldByLabel:SUBTOTAL:totals',
-    tax: 'dynamic:findFieldByLabel:TAX:totals', 
-    shipping: 'dynamic:findFieldByLabel:SHIPPING:totals',
-    other: 'dynamic:findFieldByLabel:OTHER:totals',
-    total: 'dynamic:findFieldByLabel:TOTAL:totals',
+    // Totals Section (using unique IDs)
+    subtotal: '#totals-subtotal',
+    tax: '#totals-tax', 
+    shipping: '#totals-shipping',
+    other: '#totals-other',
+    total: '#totals-total',
     
-    // Comments Section - Dynamic selector
-    comments: 'dynamic:findFieldByLabel:Comments or Special Instructions:comments',
+    // Comments Section (using unique ID)
+    comments: '#comments-field',
     
     // Footer Contact
     contactInfo: 'td[style*="text-align: center; padding: 20px"] .editable-field'
@@ -87,41 +87,36 @@ function getCurrentColumnMapping() {
     const headers = Array.from(headerRow.querySelectorAll('th'));
     const columnMap = {};
     
-    console.log('🔍 Getting current column mapping...');
     headers.forEach((header, index) => {
         const headerText = header.textContent.replace(/ID:.*$/g, '').trim();
-        console.log(`  Column ${index}: "${headerText}"`);
-        
-        // Enhanced detection logic with individual checks (not else-if chain)
-        console.log(`    🔍 Checking column ${index}: "${headerText}"`);
         
         if (headerText.includes('Item#') || headerText.includes('Item')) {
             columnMap.item = index;
-            console.log(`    ✅ Mapped to 'item' at index ${index}`);
+
         } 
         
         if (headerText.includes('Description') || headerText.includes('Desc')) {
             columnMap.description = index;
-            console.log(`    ✅ Mapped to 'description' at index ${index}`);
+
         } 
         
         if (headerText.includes('Qty') || headerText.includes('Quantity')) {
             columnMap.quantity = index;
-            console.log(`    ✅ Mapped to 'quantity' at index ${index}`);
+
         } 
         
         if (headerText.includes('Rate') || headerText.includes('Unit Price') || headerText.includes('RATE') || headerText.includes('Price')) {
             // Enhanced Rate detection - check for Rate, Unit Price, RATE, or Price
             columnMap.rate = index;
             columnMap.unitPrice = index; // legacy alias
-            console.log(`    ✅ Mapped to 'rate' at index ${index}`);
+
         } 
         
         if (headerText.includes('Amount') || headerText.includes('Total') || headerText.includes('AMOUNT') || headerText.includes('TOTAL')) {
             // Enhanced Amount detection - check for Amount, Total, AMOUNT, or TOTAL
             columnMap.amount = index;
             columnMap.total = index; // legacy alias
-            console.log(`    ✅ Mapped to 'amount' at index ${index}`);
+
         }
         
         // Check if this column wasn't mapped to anything
@@ -300,43 +295,45 @@ function findFieldByLabel(labelText, sectionName) {
             section = document.querySelector(`[data-section="${sectionName}"]`);
         }
         if (!section) {
-            console.log(`🔍 DEBUG - Section not found: ${sectionName}`);
+            console.warn(`❌ Section not found: ${sectionName}`);
             return null;
         }
         
         // Prefer matching by row: label in first cell, value in same or next cell
         const rows = section.querySelectorAll('tr');
+        
         for (const row of rows) {
             const tds = row.querySelectorAll('td');
             if (tds.length === 0) continue;
             const labelCellText = (tds[0].textContent || '').trim().toUpperCase();
+            
             if (labelCellText.startsWith(normalizedLabel)) {
-                // Same-cell editable value
-                const inline = tds[0].querySelector('.editable-field');
-                if (inline) return inline;
+                // Dynamic field detection: check all possible containers for exact label match
                 
-                // For totals section, also check for calculated fields
+                        // Try universal field scan for this section
+                const sectionField = universalFieldScanInSection(section, normalizedLabel);
+                if (sectionField) return sectionField;
+                
+                // Field not found
+                console.warn(`❌ No field found for "${labelText}" in section "${sectionName}"`);
+                return null;
+            }
+            
+            // For totals section, also check for calculated fields
+            if (labelCellText.startsWith(normalizedLabel) && sectionName === 'totals') {
+                const calculatedField = tds[0].querySelector('.calculated-field');
+                if (calculatedField) return calculatedField;
+            }
+                
+            // Next-cell editable value
+            if (tds[1]) {
+                const next = tds[1].querySelector('.editable-field');
+                if (next) return next;
+                
+                // For totals section, also check for calculated fields in next cell
                 if (sectionName === 'totals') {
-                    const calculatedField = tds[0].querySelector('.calculated-field');
+                    const calculatedField = tds[1].querySelector('.calculated-field');
                     if (calculatedField) return calculatedField;
-                    
-                    // Special case for TOTAL which has a different structure
-                    if (normalizedLabel === 'TOTAL') {
-                        const totalField = tds[0].querySelector('.total-field');
-                        if (totalField) return totalField;
-                    }
-                }
-                
-                // Next-cell editable value
-                if (tds[1]) {
-                    const next = tds[1].querySelector('.editable-field');
-                    if (next) return next;
-                    
-                    // For totals section, also check for calculated fields in next cell
-                    if (sectionName === 'totals') {
-                        const calculatedField = tds[1].querySelector('.calculated-field');
-                        if (calculatedField) return calculatedField;
-                    }
                 }
             }
         }
@@ -385,11 +382,144 @@ function findFieldByLabel(labelText, sectionName) {
             }
         }
         
-        return null;
+        // If section-based search failed, try universal scan
+        return universalFieldScanInSection(document, normalizedLabel);
+        
     } catch (error) {
         console.warn(`Error finding field by label "${labelText}" in section "${sectionName}":`, error);
         return null;
     }
+}
+
+// Universal field scan within a container (section or entire document)
+function universalFieldScanInSection(container, normalizedLabel) {
+    const allEditableFields = container.querySelectorAll('.editable-field, .calculated-field');
+
+    for (const field of allEditableFields) {
+        const isMatch = isFieldForLabel(field, normalizedLabel);
+        if (isMatch) {
+            // Debug: Show which field was matched
+            console.log(`🎯 MATCHED "${normalizedLabel}" to field:`, {
+                element: field,
+                placeholder: field.dataset.placeholder || field.getAttribute('data-placeholder'),
+                parentText: field.parentElement?.textContent?.trim().substring(0, 50) + '...',
+                currentValue: field.textContent,
+                fieldId: field.id || 'no-id',
+                outerHTML: field.outerHTML.substring(0, 100) + '...'
+            });
+            return field;
+        }
+    }
+    
+    return null;
+}
+
+// Check if an editable field belongs to a specific label by examining nearby text
+function isFieldForLabel(field, normalizedLabel) {
+    // MOST STRICT: Check immediate table row first (highest precision)
+    const tableRow = field.closest('tr');
+    if (tableRow) {
+        const cells = tableRow.querySelectorAll('td');
+        
+        // Two-column layout: label in first cell, field in second cell (like DATE, PO#, SUBTOTAL)
+        if (cells.length === 2) {
+            const labelCell = cells[0];
+            const fieldCell = cells[1];
+            const labelText = labelCell.textContent?.trim().toUpperCase() || '';
+            const fieldInSecondCell = fieldCell.querySelector('.editable-field, .calculated-field');
+            
+            // FLEXIBLE match: this field is in second cell AND first cell has label
+            if (fieldInSecondCell === field) {
+                const cleanLabelText = labelText.replace(/\s+/g, ' ').trim();
+                const cleanNormalizedLabel = normalizedLabel.replace(/\s+/g, ' ').trim();
+                
+                if (cleanLabelText === cleanNormalizedLabel + ':' || 
+                    cleanLabelText.includes(cleanNormalizedLabel + ':')) {
+                    return true;
+                }
+            }
+        }
+        
+        // Single-column layout: label and field in same cell (like company info, vendor, ship-to)
+        if (cells.length === 1) {
+            const cellText = cells[0].textContent?.trim().toUpperCase() || '';
+            const fieldsInCell = cells[0].querySelectorAll('.editable-field, .calculated-field');
+            
+            // FLEXIBLE match: handle various label formats
+            if (fieldsInCell.length === 1 && fieldsInCell[0] === field) {
+                // Try exact match first
+                if (cellText.startsWith(normalizedLabel + ':')) {
+                    return true;
+                }
+                
+                // Handle common label variations
+                const cleanCellText = cellText.replace(/\s+/g, ' ').trim();
+                const cleanLabel = normalizedLabel.replace(/\s+/g, ' ').trim();
+                
+                if (cleanCellText.startsWith(cleanLabel + ':') || 
+                    cleanCellText.includes(cleanLabel + ':')) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    // FALLBACK: Check immediate parent element for single-field containers
+    let parent = field.parentElement;
+    if (parent) {
+        const parentText = getDirectTextContent(parent).toUpperCase().trim();
+        const fieldsInParent = parent.querySelectorAll('.editable-field, .calculated-field');
+        
+        // EXACT match: only one field in parent AND parent text is exactly our label
+        if (fieldsInParent.length === 1 && fieldsInParent[0] === field && 
+            parentText === normalizedLabel + ':') {
+            return true;
+        }
+    }
+
+    // SPECIAL CASES: Handle known edge cases with exact matching
+    if (tableRow) {
+        const rowText = tableRow.textContent?.trim().toUpperCase() || '';
+        const fieldsInRow = tableRow.querySelectorAll('.editable-field, .calculated-field');
+        
+        // Only match if this is the ONLY field in the row
+        if (fieldsInRow.length === 1 && fieldsInRow[0] === field) {
+            
+            // Handle "City, ST ZIP" exact pattern
+            if (normalizedLabel === 'CITY, ST ZIP' && rowText.startsWith('CITY, ST ZIP:')) {
+                return true;
+            }
+            
+            // Handle "Comments" pattern  
+            if (normalizedLabel === 'COMMENTS' && 
+                (rowText.includes('COMMENTS:') || rowText.includes('SPECIAL INSTRUCTIONS:'))) {
+                return true;
+            }
+            
+            // Handle "PO #" exact pattern
+            if (normalizedLabel === 'PO #' && rowText.includes('PO #:')) {
+                return true;
+            }
+            
+            // Handle "DATE" exact pattern (avoid CITY/STATE confusion)
+            if (normalizedLabel === 'DATE' && rowText.includes('DATE:') && !rowText.includes('CITY')) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// Get only the direct text content of an element (excluding nested element text)
+function getDirectTextContent(element) {
+    let text = '';
+    for (const node of element.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            text += node.textContent;
+        }
+    }
+    return text.trim();
 }
 
 // Enhanced field value getter that handles dynamic selectors
@@ -536,12 +666,10 @@ function parseCurrency(value) {
 
 // Debug function to test column mapping
 function debugColumnMapping() {
-    console.log('🔍 DEBUG: Testing column mapping...');
     const mapping = getCurrentColumnMapping();
-    console.log('🔍 DEBUG: Column mapping result:', mapping);
-    
     const dynamic = createDynamicLineItemMapping();
-    console.log('🔍 DEBUG: Dynamic line item mapping:', dynamic);
+    console.log('Column mapping:', mapping);
+    console.log('Dynamic line item mapping:', dynamic);
     
     return { mapping, dynamic };
 }
