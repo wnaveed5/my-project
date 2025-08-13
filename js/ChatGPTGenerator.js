@@ -3,41 +3,56 @@ class ChatGPTGenerator {
     constructor() {
         this.apiKey = null;
         this.isConfigured = false;
-        this.apiUrl = 'https://api.openai.com/v1/chat/completions';
         this.model = 'gpt-3.5-turbo';
         
-        // Load API key from config
-        this.loadApiKey();
+        // Detect if we're running locally (file:// or localhost with simple server)
+        this.isLocal = window.location.protocol === 'file:' || 
+                      (window.location.hostname === 'localhost' && !this.hasServerlessSupport());
+        
+        if (this.isLocal) {
+            // For local development without serverless support
+            this.apiUrl = 'https://api.openai.com/v1/chat/completions';
+            this.loadApiKey();
+        } else {
+            // For Vercel or other serverless environments
+            this.apiUrl = '/api/chatgpt';
+            this.isConfigured = true;
+            console.log('✅ ChatGPT configured to use serverless function with environment variables');
+        }
     }
 
-    // Load API key from config
+    // Check if serverless functions are supported
+    hasServerlessSupport() {
+        // Check if we're on Vercel or have serverless support
+        return window.location.hostname !== 'localhost' && 
+               window.location.hostname !== '127.0.0.1' &&
+               !window.location.protocol.includes('file');
+    }
+
+    // Load API key for local development (fallback to config.js or localStorage)
     loadApiKey() {
-        // First try to load from environment variables (for Vercel/production)
-        if (typeof process !== 'undefined' && process.env && process.env.OPENAI_API_KEY) {
-            this.apiKey = process.env.OPENAI_API_KEY;
-            this.isConfigured = true;
-            console.log('✅ OpenAI API key loaded from environment variables');
-            return;
+        if (!this.isLocal) {
+            return; // Skip for production - handled by serverless function
         }
         
-        // Second try to load from config file (for local development)
+        // Try to load from config file first
         if (window.CONFIG && window.CONFIG.OPENAI_API_KEY && window.CONFIG.OPENAI_API_KEY !== 'your-openai-api-key-here') {
             this.apiKey = window.CONFIG.OPENAI_API_KEY;
             this.isConfigured = true;
-            console.log('✅ OpenAI API key loaded from config file');
+            console.log('✅ Local API key found in config.js');
             return;
         }
         
-        // Third fallback to localStorage for backward compatibility
+        // Try localStorage as fallback
         const storedKey = localStorage.getItem('openai_api_key');
-        if (storedKey) {
+        if (storedKey && storedKey.startsWith('sk-')) {
             this.apiKey = storedKey;
             this.isConfigured = true;
-            console.log('✅ OpenAI API key loaded from localStorage (fallback)');
-            console.warn('⚠️ Consider moving your API key to config.js for better security');
-        } else {
-            console.log('❌ ChatGPT API key not found in config.js file');
+            console.log('✅ Local API key found in localStorage');
+            return;
         }
+        
+        console.warn('⚠️ No API key found for local development. Please add it to config.js or configure it manually.');
     }
 
     // Configure API key
@@ -137,14 +152,10 @@ Use proper JSON field names matching this structure:
 
     // Call ChatGPT API with retry logic
     async callChatGPT(industry = 'general business', companyType = 'medium enterprise') {
-        if (!this.isConfigured) {
-            throw new Error('OpenAI API key not configured. Please set your API key first.');
-        }
-
         const systemPrompt = this.createSystemPrompt();
         const userPrompt = this.createUserPrompt(industry, companyType);
 
-        console.log('🤖 Calling ChatGPT API...');
+        console.log('🤖 Calling ChatGPT API via serverless function (using environment variable)...');
 
         // Retry logic for network issues
         const maxRetries = 3;
@@ -154,24 +165,50 @@ Use proper JSON field names matching this structure:
             try {
                 console.log(`🔄 Attempt ${attempt}/${maxRetries}...`);
                 
-                const response = await fetch(this.apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: this.model,
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: userPrompt }
-                        ],
-                        max_tokens: 2000,
-                        temperature: 0.7
-                    }),
-                    // Add timeout and better error handling
-                    signal: AbortSignal.timeout(30000) // 30 second timeout
-                });
+                let response;
+                
+                if (this.isLocal) {
+                    // For local development, call OpenAI API directly with stored key
+                    if (!this.isConfigured) {
+                        throw new Error('OpenAI API key not configured. Please set your API key first.');
+                    }
+                    
+                    response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${this.apiKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: this.model,
+                            messages: [
+                                { role: 'system', content: systemPrompt },
+                                { role: 'user', content: userPrompt }
+                            ],
+                            max_tokens: 2000,
+                            temperature: 0.7
+                        }),
+                        signal: AbortSignal.timeout(30000) // 30 second timeout
+                    });
+                } else {
+                    // For production, use serverless function (uses environment variables)
+                    response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: this.model,
+                            messages: [
+                                { role: 'system', content: systemPrompt },
+                                { role: 'user', content: userPrompt }
+                            ],
+                            max_tokens: 2000,
+                            temperature: 0.7
+                        }),
+                        signal: AbortSignal.timeout(30000) // 30 second timeout
+                    });
+                }
 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
