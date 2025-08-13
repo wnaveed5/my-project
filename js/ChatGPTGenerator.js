@@ -12,7 +12,15 @@ class ChatGPTGenerator {
 
     // Load API key from config
     loadApiKey() {
-        // First try to load from config file
+        // First try to load from environment variables (for Vercel/production)
+        if (typeof process !== 'undefined' && process.env && process.env.OPENAI_API_KEY) {
+            this.apiKey = process.env.OPENAI_API_KEY;
+            this.isConfigured = true;
+            console.log('✅ OpenAI API key loaded from environment variables');
+            return;
+        }
+        
+        // Second try to load from config file (for local development)
         if (window.CONFIG && window.CONFIG.OPENAI_API_KEY && window.CONFIG.OPENAI_API_KEY !== 'your-openai-api-key-here') {
             this.apiKey = window.CONFIG.OPENAI_API_KEY;
             this.isConfigured = true;
@@ -20,13 +28,15 @@ class ChatGPTGenerator {
             return;
         }
         
-        // Fallback to localStorage for backward compatibility
+        // Third fallback to localStorage for backward compatibility
         const storedKey = localStorage.getItem('openai_api_key');
         if (storedKey) {
             this.apiKey = storedKey;
             this.isConfigured = true;
             console.log('✅ OpenAI API key loaded from localStorage (fallback)');
             console.warn('⚠️ Consider moving your API key to config.js for better security');
+        } else {
+            console.log('❌ ChatGPT API key not found in config.js file');
         }
     }
 
