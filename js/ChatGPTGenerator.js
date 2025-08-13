@@ -210,8 +210,302 @@ Use proper JSON field names matching this structure:
         return await this.callChatGPT(industry, companyType);
     }
 
-    // populateForm, clearAllFields, createGenerateButton methods stay unchanged from your original
-    // ...
+    // Populate form with ChatGPT generated data
+    async populateForm(industry = 'general business', companyType = 'medium enterprise') {
+        try {
+            const data = await this.generateData(industry, companyType);
+            
+            console.log('📝 Populating form with ChatGPT data...');
+            console.log('🔍 DEBUG - Raw ChatGPT data received:', data);
+            
+            // Temporarily disable auto-calculations to prevent interference
+            const editableFields = document.querySelectorAll('.editable-field');
+            const originalEventListeners = new Map();
+            
+            editableFields.forEach(field => {
+                // Store and remove event listeners temporarily
+                const clonedField = field.cloneNode(true);
+                originalEventListeners.set(field, {
+                    oninput: field.oninput,
+                    onblur: field.onblur
+                });
+                
+                // Clear event listeners
+                field.oninput = null;
+                field.onblur = null;
+            });
+            
+            console.log('⏸️ Temporarily disabled auto-calculations to preserve formatting...');
+            
+            // Use dynamic field mapping that respects current column order
+            if (window.UTILS && window.UTILS.getDynamicFieldMapping) {
+                console.log('🔄 Getting dynamic field mapping to respect current column order...');
+                const fieldMapping = window.UTILS.getDynamicFieldMapping();
+                
+                Object.entries(data).forEach(([fieldName, value]) => {
+                    console.log(`🔍 DEBUG - Processing field: ${fieldName} = "${value}"`);
+                    
+                    if (fieldMapping[fieldName]) {
+                        let element = null;
+                        const selector = fieldMapping[fieldName];
+                        
+                        // Handle dynamic selectors (same logic as in utils.js)
+                        if (selector.startsWith('dynamic:')) {
+                            const parts = selector.split(':');
+                            const command = parts[1];
+                            
+                            if (command === 'findFieldByLabel') {
+                                const labelText = parts[2];
+                                const sectionName = parts[3];
+                                element = window.UTILS.findFieldByLabel(labelText, sectionName);
+                            }
+                        } else {
+                            // Handle regular CSS selectors
+                            element = document.querySelector(selector);
+                        }
+                        
+                        console.log(`🔍 DEBUG - Selector for ${fieldName}: ${selector}`);
+                        console.log(`🔍 DEBUG - Element found:`, element);
+                        
+                        if (element) {
+                            // Fix double dollar signs to single dollar signs
+                            let cleanValue = value;
+                            if (typeof value === 'string' && value.includes('$$')) {
+                                cleanValue = value.replace(/\$\$/g, '$');
+                                console.log(`🔧 Fixed double $ in ${fieldName}: "${value}" → "${cleanValue}"`);
+                            }
+                            
+                            // Check if this is a financial field
+                            const isFinancialField = ['subtotal', 'tax', 'shipping', 'other', 'total', 'lineItem1Rate', 'lineItem1Amount', 'lineItem2Rate', 'lineItem2Amount', 'lineItem3Rate', 'lineItem3Amount', 'lineItem4Rate', 'lineItem4Amount', 'lineItem5Rate', 'lineItem5Amount'].includes(fieldName);
+                            if (isFinancialField) {
+                                console.log(`💰 DEBUG - Financial field ${fieldName}: "${cleanValue}"`);
+                            }
+                            
+                            element.textContent = cleanValue;
+                            console.log(`✓ Set ${fieldName}: "${cleanValue}"`);
+                            
+                            // Verify what actually got set
+                            setTimeout(() => {
+                                const actualValue = element.textContent;
+                                console.log(`🔍 DEBUG - Actual value in DOM for ${fieldName}: "${actualValue}"`);
+                                if (actualValue !== cleanValue) {
+                                    console.warn(`⚠️ Value mismatch! Expected: "${cleanValue}", Got: "${actualValue}"`);
+                                }
+                            }, 100);
+                        } else {
+                            console.warn(`⚠️ Element not found for ${fieldName}`);
+                        }
+                    } else {
+                        console.warn(`⚠️ No mapping found for field: ${fieldName}`);
+                    }
+                });
+                
+                // Re-enable event listeners after population
+                setTimeout(() => {
+                    console.log('🔄 Re-enabling auto-calculations...');
+                    editableFields.forEach(field => {
+                        const listeners = originalEventListeners.get(field);
+                        if (listeners) {
+                            field.oninput = listeners.oninput;
+                            field.onblur = listeners.onblur;
+                        }
+                    });
+                    console.log('✅ Auto-calculations re-enabled');
+                }, 500);
+                
+                console.log('✅ Form populated with ChatGPT data successfully');
+                return data;
+            } else {
+                throw new Error('UTILS.getDynamicFieldMapping not available');
+            }
+        } catch (error) {
+            console.error('❌ Failed to populate form with ChatGPT data:', error);
+            throw error;
+        }
+    }
+
+    // Clear all form fields
+    clearAllFields() {
+        console.log('🧹 Clearing all form fields...');
+        
+        // Clear all editable fields by finding them directly
+        const editableFields = document.querySelectorAll('.editable-field');
+        let clearedCount = 0;
+        
+        editableFields.forEach(field => {
+            if (field) {
+                field.textContent = '';
+                field.innerHTML = '';
+                clearedCount++;
+            }
+        });
+        
+        console.log(`✅ Cleared ${clearedCount} editable fields`);
+        
+        // Also use dynamic field mapping as backup to ensure all mapped fields are cleared
+        if (window.UTILS && window.UTILS.getDynamicFieldMapping) {
+            const fieldMapping = window.UTILS.getDynamicFieldMapping();
+            
+            Object.entries(fieldMapping).forEach(([fieldName, selector]) => {
+                let element = null;
+                
+                // Handle dynamic selectors (same logic as in population)
+                if (selector.startsWith('dynamic:')) {
+                    const parts = selector.split(':');
+                    const command = parts[1];
+                    
+                    if (command === 'findFieldByLabel') {
+                        const labelText = parts[2];
+                        const sectionName = parts[3];
+                        element = window.UTILS.findFieldByLabel(labelText, sectionName);
+                    }
+                } else {
+                    // Handle regular CSS selectors
+                    element = document.querySelector(selector);
+                }
+                
+                if (element) {
+                    element.textContent = '';
+                    element.innerHTML = '';
+                }
+            });
+        }
+        
+        console.log('✅ All form fields cleared completely');
+    }
+
+    // Create simple generate button
+    createGenerateButton() {
+        // Check if button already exists
+        if (document.getElementById('chatgpt-generate-btn')) {
+            return;
+        }
+
+        const generateBtn = document.createElement('button');
+        generateBtn.id = 'chatgpt-generate-btn';
+        generateBtn.textContent = '🤖 Generate Data with ChatGPT';
+        generateBtn.style.cssText = `
+            position: fixed;
+            top: 200px;
+            right: 20px;
+            z-index: 1000;
+            padding: 12px 20px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s ease;
+        `;
+
+        // Add hover effect
+        generateBtn.addEventListener('mouseenter', () => {
+            generateBtn.style.background = '#059669';
+            generateBtn.style.transform = 'translateY(-1px)';
+        });
+        
+        generateBtn.addEventListener('mouseleave', () => {
+            generateBtn.style.background = '#10b981';
+            generateBtn.style.transform = 'translateY(0)';
+        });
+
+        generateBtn.addEventListener('click', async () => {
+            if (!this.isConfigured) {
+                if (this.isLocal) {
+                    const apiKey = prompt('Please enter your OpenAI API key for local development:');
+                    if (apiKey) {
+                        try {
+                            this.configureApiKey(apiKey);
+                        } catch (error) {
+                            alert('❌ ' + error.message);
+                            return;
+                        }
+                    } else {
+                        return;
+                    }
+                } else {
+                    alert('❌ API key not configured in environment variables');
+                    return;
+                }
+            }
+
+            try {
+                generateBtn.textContent = '⏳ Generating...';
+                generateBtn.disabled = true;
+                generateBtn.style.background = '#6b7280';
+                
+                await this.populateForm();
+                
+                generateBtn.textContent = '✅ Generated!';
+                generateBtn.style.background = '#059669';
+                
+                setTimeout(() => {
+                    generateBtn.textContent = '🤖 Generate Data with ChatGPT';
+                    generateBtn.style.background = '#10b981';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('ChatGPT generation failed:', error);
+                alert('❌ ChatGPT generation failed: ' + error.message);
+                generateBtn.textContent = '🤖 Generate Data with ChatGPT';
+                generateBtn.style.background = '#10b981';
+            } finally {
+                generateBtn.disabled = false;
+            }
+        });
+
+        document.body.appendChild(generateBtn);
+
+        // Create clear button below the generate button
+        const clearBtn = document.createElement('button');
+        clearBtn.id = 'chatgpt-clear-btn';
+        clearBtn.textContent = '🧹 Clear All Fields';
+        clearBtn.style.cssText = `
+            position: fixed;
+            top: 260px;
+            right: 20px;
+            z-index: 1000;
+            padding: 12px 20px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+            transition: all 0.2s ease;
+        `;
+
+        // Add hover effect for clear button
+        clearBtn.addEventListener('mouseenter', () => {
+            clearBtn.style.background = '#dc2626';
+            clearBtn.style.transform = 'translateY(-1px)';
+        });
+        
+        clearBtn.addEventListener('mouseleave', () => {
+            clearBtn.style.background = '#ef4444';
+            clearBtn.style.transform = 'translateY(0)';
+        });
+
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all fields?')) {
+                this.clearAllFields();
+                clearBtn.textContent = '✅ Cleared!';
+                clearBtn.style.background = '#059669';
+                
+                setTimeout(() => {
+                    clearBtn.textContent = '🧹 Clear All Fields';
+                    clearBtn.style.background = '#ef4444';
+                }, 1500);
+            }
+        });
+
+        document.body.appendChild(clearBtn);
+    }
 }
 
 // Create global instance
