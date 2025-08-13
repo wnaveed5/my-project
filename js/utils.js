@@ -1,85 +1,81 @@
 // Utility functions and field mapping configuration
 
-// Comprehensive field mapping configuration
+// Dynamic field mapping that survives DOM rearrangement
 const FIELD_MAPPING = {
-    // Company Info
-    companyName: 'td[style*="width: 60%"] table tr:nth-child(1) td table tr:nth-child(1) td .editable-field',
-    companyAddress: 'td[style*="width: 60%"] table tr:nth-child(1) td table tr:nth-child(2) td .editable-field',
-    companyCityState: 'td[style*="width: 60%"] table tr:nth-child(1) td table tr:nth-child(3) td .editable-field',
-    companyPhone: 'td[style*="width: 60%"] table tr:nth-child(1) td table tr:nth-child(4) td .editable-field',
-    companyFax: 'td[style*="width: 60%"] table tr:nth-child(1) td table tr:nth-child(5) td .editable-field',
-    companyWebsite: 'td[style*="width: 60%"] table tr:nth-child(1) td table tr:nth-child(6) td .editable-field',
+    // Use special functions instead of static selectors for robustness
+    companyName: 'dynamic:findFieldByLabel:Company Name:company-info',
+    companyAddress: 'dynamic:findFieldByLabel:Street Address:company-info', 
+    companyCityState: 'dynamic:findFieldByLabel:City, ST ZIP:company-info',
+    companyPhone: 'dynamic:findFieldByLabel:Phone:company-info',
+    companyFax: 'dynamic:findFieldByLabel:Fax:company-info',
+    companyWebsite: 'dynamic:findFieldByLabel:Website:company-info',
     
     // PO Details
-    poDate: 'td[style*="width: 40%"] table tr:nth-child(2) td table tr:nth-child(1) td:last-child .editable-field',
-    poNumber: 'td[style*="width: 40%"] table tr:nth-child(2) td table tr:nth-child(2) td:last-child .editable-field',
+    poDate: 'dynamic:findFieldByLabel:DATE:purchase-order',
+    poNumber: 'dynamic:findFieldByLabel:PO #:purchase-order',
     
-    // Vendor Section
-    vendorCompany: 'td[style*="width: 50%"]:first-child table tr:nth-child(2) td table tr:nth-child(1) td .editable-field',
-    vendorContact: 'td[style*="width: 50%"]:first-child table tr:nth-child(2) td table tr:nth-child(2) td .editable-field',
-    vendorAddress: 'td[style*="width: 50%"]:first-child table tr:nth-child(2) td table tr:nth-child(3) td .editable-field',
-    vendorCityState: 'td[style*="width: 50%"]:first-child table tr:nth-child(2) td table tr:nth-child(4) td .editable-field',
-    vendorPhone: 'td[style*="width: 50%"]:first-child table tr:nth-child(2) td table tr:nth-child(5) td .editable-field',
-    vendorFax: 'td[style*="width: 50%"]:first-child table tr:nth-child(2) td table tr:nth-child(6) td .editable-field',
+    // Vendor Section (using dynamic label-based mapping)
+    vendorCompany: 'dynamic:findFieldByLabel:Company Name:vendor',
+    vendorContact: 'dynamic:findFieldByLabel:Contact or Department:vendor',
+    vendorAddress: 'dynamic:findFieldByLabel:Street Address:vendor',
+    vendorCityState: 'dynamic:findFieldByLabel:City, ST ZIP:vendor',
+    vendorPhone: 'dynamic:findFieldByLabel:Phone:vendor',
+    vendorFax: 'dynamic:findFieldByLabel:Fax:vendor',
     
-    // Ship To Section
-    shipToName: 'td[style*="width: 50%"]:last-child table tr:nth-child(2) td table tr:nth-child(1) td .editable-field',
-    shipToCompany: 'td[style*="width: 50%"]:last-child table tr:nth-child(2) td table tr:nth-child(2) td .editable-field',
-    shipToAddress: 'td[style*="width: 50%"]:last-child table tr:nth-child(2) td table tr:nth-child(3) td .editable-field',
-    shipToCityState: 'td[style*="width: 50%"]:last-child table tr:nth-child(2) td table tr:nth-child(4) td .editable-field',
-    shipToPhone: 'td[style*="width: 50%"]:last-child table tr:nth-child(2) td table tr:nth-child(5) td .editable-field',
+    // Ship To Section (using dynamic label-based mapping)
+    shipToName: 'dynamic:findFieldByLabel:Name:ship-to',
+    shipToCompany: 'dynamic:findFieldByLabel:Company Name:ship-to',
+    shipToAddress: 'dynamic:findFieldByLabel:Street Address:ship-to',
+    shipToCityState: 'dynamic:findFieldByLabel:City, ST ZIP:ship-to',
+    shipToPhone: 'dynamic:findFieldByLabel:Phone:ship-to',
+    shipToFax: 'dynamic:findFieldByLabel:Fax:ship-to',
     
-    // Shipping Details
-    requisitioner: 'td[style*="width: 25%"]:nth-of-type(1) .editable-field',
-    shipVia: 'td[style*="width: 25%"]:nth-of-type(2) .editable-field',
-    fob: 'td[style*="width: 25%"]:nth-of-type(3) .editable-field',
-    shippingTerms: 'td[style*="width: 25%"]:nth-of-type(4) .editable-field',
+    // Shipping Details - Updated for single row layout
+    requisitioner: 'table.shipping-details tr:nth-child(2) td:nth-child(1) .editable-field',
+    shipVia: 'table.shipping-details tr:nth-child(2) td:nth-child(2) .editable-field',
+    fob: 'table.shipping-details tr:nth-child(2) td:nth-child(3) .editable-field',
+    shippingTerms: 'table.shipping-details tr:nth-child(2) td:nth-child(4) .editable-field',
     
-    // Line Items (up to 5 items) - Fixed to match actual HTML structure
-    lineItem1Qty: 'table.itemtable tbody tr:nth-child(1) td:nth-child(1) .editable-field',
-    lineItem1Item: 'table.itemtable tbody tr:nth-child(1) td:nth-child(2) .itemname .editable-field',
-    lineItem1Desc: 'table.itemtable tbody tr:nth-child(1) td:nth-child(2) .editable-field:nth-of-type(2)',
-    lineItem1Options: 'table.itemtable tbody tr:nth-child(1) td:nth-child(3) .editable-field',
-    lineItem1Rate: 'table.itemtable tbody tr:nth-child(1) td:nth-child(4) .editable-field',
-    lineItem1Amount: 'table.itemtable tbody tr:nth-child(1) td:nth-child(5) .editable-field',
+    // Line Items (up to 5 items) - Updated for colspan structure
+    lineItem1Qty: 'table.itemtable tbody tr:nth-child(1) td:nth-child(4) .editable-field',
+    lineItem1Item: 'table.itemtable tbody tr:nth-child(1) td:nth-child(2) .editable-field',
+    lineItem1Desc: 'table.itemtable tbody tr:nth-child(1) td:nth-child(3) .editable-field',
+    lineItem1Rate: 'table.itemtable tbody tr:nth-child(1) td:nth-child(5) .editable-field',
+    lineItem1Amount: 'table.itemtable tbody tr:nth-child(1) td:nth-child(6) .editable-field',
     
-    lineItem2Qty: 'table.itemtable tbody tr:nth-child(2) td:nth-child(1) .editable-field',
-    lineItem2Item: 'table.itemtable tbody tr:nth-child(2) td:nth-child(2) .itemname .editable-field',
-    lineItem2Desc: 'table.itemtable tbody tr:nth-child(2) td:nth-child(2) .editable-field:nth-of-type(2)',
-    lineItem2Options: 'table.itemtable tbody tr:nth-child(2) td:nth-child(3) .editable-field',
-    lineItem2Rate: 'table.itemtable tbody tr:nth-child(2) td:nth-child(4) .editable-field',
-    lineItem2Amount: 'table.itemtable tbody tr:nth-child(2) td:nth-child(5) .editable-field',
+    lineItem2Qty: 'table.itemtable tbody tr:nth-child(2) td:nth-child(4) .editable-field',
+    lineItem2Item: 'table.itemtable tbody tr:nth-child(2) td:nth-child(2) .editable-field',
+    lineItem2Desc: 'table.itemtable tbody tr:nth-child(2) td:nth-child(3) .editable-field',
+    lineItem2Rate: 'table.itemtable tbody tr:nth-child(2) td:nth-child(5) .editable-field',
+    lineItem2Amount: 'table.itemtable tbody tr:nth-child(2) td:nth-child(6) .editable-field',
     
-    lineItem3Qty: 'table.itemtable tbody tr:nth-child(3) td:nth-child(1) .editable-field',
-    lineItem3Item: 'table.itemtable tbody tr:nth-child(3) td:nth-child(2) .itemname .editable-field',
-    lineItem3Desc: 'table.itemtable tbody tr:nth-child(3) td:nth-child(2) .editable-field:nth-of-type(2)',
-    lineItem3Options: 'table.itemtable tbody tr:nth-child(3) td:nth-child(3) .editable-field',
-    lineItem3Rate: 'table.itemtable tbody tr:nth-child(3) td:nth-child(4) .editable-field',
-    lineItem3Amount: 'table.itemtable tbody tr:nth-child(3) td:nth-child(5) .editable-field',
+    lineItem3Qty: 'table.itemtable tbody tr:nth-child(3) td:nth-child(4) .editable-field',
+    lineItem3Item: 'table.itemtable tbody tr:nth-child(3) td:nth-child(2) .editable-field',
+    lineItem3Desc: 'table.itemtable tbody tr:nth-child(3) td:nth-child(3) .editable-field',
+    lineItem3Rate: 'table.itemtable tbody tr:nth-child(3) td:nth-child(5) .editable-field',
+    lineItem3Amount: 'table.itemtable tbody tr:nth-child(3) td:nth-child(6) .editable-field',
     
-    lineItem4Qty: 'table.itemtable tbody tr:nth-child(4) td:nth-child(1) .editable-field',
-    lineItem4Item: 'table.itemtable tbody tr:nth-child(4) td:nth-child(2) .itemname .editable-field',
-    lineItem4Desc: 'table.itemtable tbody tr:nth-child(4) td:nth-child(2) .editable-field:nth-of-type(2)',
-    lineItem4Options: 'table.itemtable tbody tr:nth-child(4) td:nth-child(3) .editable-field',
-    lineItem4Rate: 'table.itemtable tbody tr:nth-child(4) td:nth-child(4) .editable-field',
-    lineItem4Amount: 'table.itemtable tbody tr:nth-child(4) td:nth-child(5) .editable-field',
+    lineItem4Qty: 'table.itemtable tbody tr:nth-child(4) td:nth-child(4) .editable-field',
+    lineItem4Item: 'table.itemtable tbody tr:nth-child(4) td:nth-child(2) .editable-field',
+    lineItem4Desc: 'table.itemtable tbody tr:nth-child(4) td:nth-child(3) .editable-field',
+    lineItem4Rate: 'table.itemtable tbody tr:nth-child(4) td:nth-child(5) .editable-field',
+    lineItem4Amount: 'table.itemtable tbody tr:nth-child(4) td:nth-child(6) .editable-field',
     
-    lineItem5Qty: 'table.itemtable tbody tr:nth-child(5) td:nth-child(1) .editable-field',
-    lineItem5Item: 'table.itemtable tbody tr:nth-child(5) td:nth-child(2) .itemname .editable-field',
-    lineItem5Desc: 'table.itemtable tbody tr:nth-child(5) td:nth-child(2) .editable-field:nth-of-type(2)',
-    lineItem5Options: 'table.itemtable tbody tr:nth-child(5) td:nth-child(3) .editable-field',
-    lineItem5Rate: 'table.itemtable tbody tr:nth-child(5) td:nth-child(4) .editable-field',
-    lineItem5Amount: 'table.itemtable tbody tr:nth-child(5) td:nth-child(5) .editable-field',
+    lineItem5Qty: 'table.itemtable tbody tr:nth-child(5) td:nth-child(4) .editable-field',
+    lineItem5Item: 'table.itemtable tbody tr:nth-child(5) td:nth-child(2) .editable-field',
+    lineItem5Desc: 'table.itemtable tbody tr:nth-child(5) td:nth-child(3) .editable-field',
+    lineItem5Rate: 'table.itemtable tbody tr:nth-child(5) td:nth-child(5) .editable-field',
+    lineItem5Amount: 'table.itemtable tbody tr:nth-child(5) td:nth-child(6) .editable-field',
     
-    // Totals Section
-    subtotal: 'td[style*="width: 30%"] table tr:nth-child(1) td:last-child .editable-field',
-    tax: 'td[style*="width: 30%"] table tr:nth-child(2) td:last-child .editable-field',
-    shipping: 'td[style*="width: 30%"] table tr:nth-child(3) td:last-child .editable-field',
-    other: 'td[style*="width: 30%"] table tr:nth-child(4) td:last-child .editable-field',
-    total: 'td[style*="width: 30%"] table tr:nth-child(5) td:last-child .editable-field',
+    // Totals Section - Dynamic selectors that work with drag and drop
+    subtotal: 'dynamic:findFieldByLabel:SUBTOTAL:totals',
+    tax: 'dynamic:findFieldByLabel:TAX:totals', 
+    shipping: 'dynamic:findFieldByLabel:SHIPPING:totals',
+    other: 'dynamic:findFieldByLabel:OTHER:totals',
+    total: 'dynamic:findFieldByLabel:TOTAL:totals',
     
-    // Comments Section
-    comments: 'td[style*="width: 70%"] .editable-field',
+    // Comments Section - Dynamic selector
+    comments: 'dynamic:findFieldByLabel:Comments or Special Instructions:comments',
     
     // Footer Contact
     contactInfo: 'td[style*="text-align: center; padding: 20px"] .editable-field'
@@ -96,26 +92,140 @@ function getCurrentColumnMapping() {
         const headerText = header.textContent.replace(/ID:.*$/g, '').trim();
         console.log(`  Column ${index}: "${headerText}"`);
         
-        if (headerText.includes('Item#')) {
+        // Enhanced detection logic with individual checks (not else-if chain)
+        console.log(`    🔍 Checking column ${index}: "${headerText}"`);
+        
+        if (headerText.includes('Item#') || headerText.includes('Item')) {
             columnMap.item = index;
-            console.log(`    → Mapped to 'item' at index ${index}`);
-        } else if (headerText.includes('Description')) {
+            console.log(`    ✅ Mapped to 'item' at index ${index}`);
+        } 
+        
+        if (headerText.includes('Description') || headerText.includes('Desc')) {
             columnMap.description = index;
-            console.log(`    → Mapped to 'description' at index ${index}`);
-        } else if (headerText.includes('Qty')) {
+            console.log(`    ✅ Mapped to 'description' at index ${index}`);
+        } 
+        
+        if (headerText.includes('Qty') || headerText.includes('Quantity')) {
             columnMap.quantity = index;
-            console.log(`    → Mapped to 'quantity' at index ${index}`);
-        } else if (headerText.includes('Unit Price')) {
-            columnMap.unitPrice = index;
-            console.log(`    → Mapped to 'unitPrice' at index ${index}`);
-        } else if (headerText.includes('Total Price')) {
-            columnMap.total = index;
-            console.log(`    → Mapped to 'total' at index ${index}`);
+            console.log(`    ✅ Mapped to 'quantity' at index ${index}`);
+        } 
+        
+        if (headerText.includes('Rate') || headerText.includes('Unit Price') || headerText.includes('RATE') || headerText.includes('Price')) {
+            // Enhanced Rate detection - check for Rate, Unit Price, RATE, or Price
+            columnMap.rate = index;
+            columnMap.unitPrice = index; // legacy alias
+            console.log(`    ✅ Mapped to 'rate' at index ${index}`);
+        } 
+        
+        if (headerText.includes('Amount') || headerText.includes('Total') || headerText.includes('AMOUNT') || headerText.includes('TOTAL')) {
+            // Enhanced Amount detection - check for Amount, Total, AMOUNT, or TOTAL
+            columnMap.amount = index;
+            columnMap.total = index; // legacy alias
+            console.log(`    ✅ Mapped to 'amount' at index ${index}`);
+        }
+        
+        // Check if this column wasn't mapped to anything
+        const mapped = (columnMap.item === index) || (columnMap.description === index) || 
+                      (columnMap.quantity === index) || (columnMap.rate === index) || (columnMap.amount === index);
+        if (!mapped && headerText.trim() !== '') {
+            console.log(`    ❌ No mapping for column ${index} with text "${headerText}"`);
         }
     });
     
     console.log('📋 Final column mapping:', columnMap);
     return columnMap;
+}
+
+// Helper to get an editable field inside a line item cell for a given row and column type
+function getLineItemEditableField(rowIndexOneBased, columnType) {
+    const table = document.querySelector('table.itemtable');
+    if (!table) return null;
+    const tbodyRows = table.querySelectorAll('tbody tr');
+    if (!tbodyRows || tbodyRows.length === 0) return null;
+    const row = tbodyRows[rowIndexOneBased - 1];
+    if (!row) return null;
+    
+    const map = getCurrentColumnMapping();
+    // Normalize requested columnType to our map keys
+    let key = columnType;
+    if (columnType === 'rate' && map.rate === undefined) key = 'unitPrice';
+    if (columnType === 'amount' && map.amount === undefined) key = 'total';
+    
+    const columnIndex = map[key];
+    if (columnIndex === undefined) return null;
+    
+    const cells = row.querySelectorAll('td');
+    const cell = cells[columnIndex];
+    if (!cell) return null;
+    return cell.querySelector('.editable-field');
+}
+
+// Create dynamic field mapping for line items based on current column order
+function createDynamicLineItemMapping() {
+    console.log('🔄 Creating dynamic line item mapping based on current column order...');
+    
+    const dynamicMapping = {};
+    const columnMap = getCurrentColumnMapping();
+    
+    console.log('📊 Current column mapping:', columnMap);
+    
+    // Map line items for up to 5 rows
+    for (let row = 1; row <= 5; row++) {
+        // Map each field type to its current column position
+        Object.entries(columnMap).forEach(([fieldType, columnIndex]) => {
+            if (fieldType !== 'unknown') {
+                // Map field types to the expected ChatGPT field names
+                let fieldSuffix = '';
+                switch (fieldType) {
+                    case 'item':
+                        fieldSuffix = 'Item';
+                        break;
+                    case 'description':
+                        fieldSuffix = 'Desc';
+                        break;
+                    case 'quantity':
+                        fieldSuffix = 'Qty';
+                        break;
+                    case 'rate':
+                    case 'unitPrice':
+                        fieldSuffix = 'Rate';
+                        break;
+                    case 'amount':
+                    case 'total':
+                        fieldSuffix = 'Amount';
+                        break;
+                    default:
+                        fieldSuffix = fieldType.charAt(0).toUpperCase() + fieldType.slice(1);
+                }
+                
+                const fieldKey = `lineItem${row}${fieldSuffix}`;
+                const selector = `table.itemtable tbody tr:nth-child(${row}) td:nth-child(${parseInt(columnIndex) + 1}) .editable-field`;
+                dynamicMapping[fieldKey] = selector;
+                console.log(`🔗 Mapped ${fieldKey} -> column ${parseInt(columnIndex) + 1} (${fieldType})`);
+            }
+        });
+    }
+    
+    console.log('✅ Dynamic line item mapping created:', dynamicMapping);
+    return dynamicMapping;
+}
+
+// Get complete field mapping with dynamic line items
+function getDynamicFieldMapping() {
+    // Start with the base static mapping
+    const baseMapping = { ...FIELD_MAPPING };
+    
+    // Remove old static line item mappings
+    Object.keys(baseMapping).forEach(key => {
+        if (key.startsWith('lineItem')) {
+            delete baseMapping[key];
+        }
+    });
+    
+    // Add dynamic line item mappings
+    const dynamicLineItemMapping = createDynamicLineItemMapping();
+    
+    return { ...baseMapping, ...dynamicLineItemMapping };
 }
 
 // Field validation function - now shows field status without blocking conversion
@@ -126,8 +236,24 @@ function validateAllFields() {
     let emptyCount = 0;
     
     for (const [fieldName, selector] of Object.entries(FIELD_MAPPING)) {
-        const element = document.querySelector(selector);
-        const value = element?.textContent.trim() || '';
+        let element = null;
+        let value = '';
+        
+        // Support dynamic selectors (e.g., dynamic:findFieldByLabel:Label:section)
+        if (typeof selector === 'string' && selector.startsWith('dynamic:')) {
+            const parts = selector.split(':');
+            const command = parts[1];
+            if (command === 'findFieldByLabel') {
+                const labelText = parts[2];
+                const sectionName = parts[3];
+                element = findFieldByLabel(labelText, sectionName);
+            }
+        } else {
+            // Fallback to regular CSS selector
+            element = document.querySelector(selector);
+        }
+        
+        value = element?.textContent.trim() || '';
         const isEmpty = !value;
         
         validationResults[fieldName] = {
@@ -140,7 +266,6 @@ function validateAllFields() {
         if (isEmpty) {
             emptyCount++;
             console.log(`${fieldName}: EMPTY`);
-            // Remove any highlighting from empty fields
             if (element) {
                 element.style.backgroundColor = '';
                 element.style.border = '';
@@ -148,7 +273,6 @@ function validateAllFields() {
         } else {
             filledCount++;
             console.log(`${fieldName}: "${value}"`);
-            // Remove any highlighting from filled fields
             if (element) {
                 element.style.backgroundColor = '';
                 element.style.border = '';
@@ -164,11 +288,133 @@ function validateAllFields() {
     return true; // Always return true to allow conversion
 }
 
-// Utility function to get field values
+// Helper function to find field by label text within a section
+function findFieldByLabel(labelText, sectionName) {
+    try {
+        const normalizedLabel = (labelText || '').toString().trim().toUpperCase();
+        if (!normalizedLabel) return null;
+        
+        // Find the section first - check both header-cell and regular elements
+        let section = document.querySelector(`.header-cell[data-section="${sectionName}"]`);
+        if (!section) {
+            section = document.querySelector(`[data-section="${sectionName}"]`);
+        }
+        if (!section) {
+            console.log(`🔍 DEBUG - Section not found: ${sectionName}`);
+            return null;
+        }
+        
+        // Prefer matching by row: label in first cell, value in same or next cell
+        const rows = section.querySelectorAll('tr');
+        for (const row of rows) {
+            const tds = row.querySelectorAll('td');
+            if (tds.length === 0) continue;
+            const labelCellText = (tds[0].textContent || '').trim().toUpperCase();
+            if (labelCellText.startsWith(normalizedLabel)) {
+                // Same-cell editable value
+                const inline = tds[0].querySelector('.editable-field');
+                if (inline) return inline;
+                
+                // For totals section, also check for calculated fields
+                if (sectionName === 'totals') {
+                    const calculatedField = tds[0].querySelector('.calculated-field');
+                    if (calculatedField) return calculatedField;
+                    
+                    // Special case for TOTAL which has a different structure
+                    if (normalizedLabel === 'TOTAL') {
+                        const totalField = tds[0].querySelector('.total-field');
+                        if (totalField) return totalField;
+                    }
+                }
+                
+                // Next-cell editable value
+                if (tds[1]) {
+                    const next = tds[1].querySelector('.editable-field');
+                    if (next) return next;
+                    
+                    // For totals section, also check for calculated fields in next cell
+                    if (sectionName === 'totals') {
+                        const calculatedField = tds[1].querySelector('.calculated-field');
+                        if (calculatedField) return calculatedField;
+                    }
+                }
+            }
+        }
+        
+        // Fallback: scan all cells for contains() then same/next cell
+        const cells = section.querySelectorAll('td');
+        for (const cell of cells) {
+            const cellText = (cell.textContent || '').toUpperCase();
+            if (cellText.includes(normalizedLabel)) {
+                // Same cell
+                const inline = cell.querySelector('.editable-field');
+                if (inline) return inline;
+                
+                // For totals section, also check for calculated fields
+                if (sectionName === 'totals') {
+                    const calculatedField = cell.querySelector('.calculated-field');
+                    if (calculatedField) return calculatedField;
+                    
+                    // Special case for TOTAL which has a different structure
+                    if (normalizedLabel === 'TOTAL') {
+                        const totalField = cell.querySelector('.total-field');
+                        if (totalField) return totalField;
+                    }
+                }
+                
+                // Try next sibling
+                const nextCell = cell.nextElementSibling;
+                if (nextCell) {
+                    const nextInline = nextCell.querySelector('.editable-field');
+                    if (nextInline) return nextInline;
+                    
+                    // For totals section, also check for calculated fields in next sibling
+                    if (sectionName === 'totals') {
+                        const calculatedField = nextCell.querySelector('.calculated-field');
+                        if (calculatedField) return calculatedField;
+                    }
+                }
+            }
+        }
+        
+        // Special case for comments section: the label is in one row, the field is in another
+        if (sectionName === 'comments' && normalizedLabel.includes('COMMENTS')) {
+            const allFields = section.querySelectorAll('.editable-field');
+            if (allFields.length > 0) {
+                return allFields[0]; // Return the first (and likely only) editable field in the comments section
+            }
+        }
+        
+        return null;
+    } catch (error) {
+        console.warn(`Error finding field by label "${labelText}" in section "${sectionName}":`, error);
+        return null;
+    }
+}
+
+// Enhanced field value getter that handles dynamic selectors
 function getFieldValues() {
     const fieldValues = {};
+    
     Object.keys(FIELD_MAPPING).forEach(key => {
-        const element = document.querySelector(FIELD_MAPPING[key]);
+        const selector = FIELD_MAPPING[key];
+        let element = null;
+        
+        // Handle dynamic selectors
+        if (selector.startsWith('dynamic:')) {
+            const parts = selector.split(':');
+            const command = parts[1];
+            
+            if (command === 'findFieldByLabel') {
+                const labelText = parts[2];
+                const sectionName = parts[3];
+                element = findFieldByLabel(labelText, sectionName);
+            }
+        } else {
+            // Handle regular CSS selectors
+            element = document.querySelector(selector);
+        }
+        
         if (element) {
             // Get only the text content, excluding any HTML elements like ID labels
             const value = element.textContent.replace(/ID:.*$/g, '').trim() || '';
@@ -177,6 +423,7 @@ function getFieldValues() {
             fieldValues[key] = '';
         }
     });
+    
     return fieldValues;
 }
 
@@ -227,8 +474,8 @@ function getLineItems() {
             <td style="padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: center;">${itemNumber}</td>
             <td style="padding: 6px; border-bottom: 1px solid #e5e7eb;">${description}</td>
             <td style="padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: center;">${qty}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: right;">$${unitPrice}</td>
-            <td style="padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: right;">$${totalPrice}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: right;">${unitPrice}</td>
+            <td style="padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: right;">${totalPrice}</td>
         </tr>`;
                 console.log(`Added line item ${index + 1} to XML`);
             } else {
@@ -245,11 +492,78 @@ function getLineItems() {
     return lineItemsHtml;
 }
 
+// Robust currency formatter for both HTML and XML
+function formatCurrency(value) {
+    if (!value || value.toString().trim() === '') return '';
+    
+    // Handle various input formats
+    const stringValue = value.toString().trim();
+    
+    // If already formatted with dollar sign, check if it needs reformatting
+    if (stringValue.includes('$')) {
+        const numericPart = stringValue.replace(/[$,\s]/g, '');
+        if (!isNaN(numericPart) && numericPart !== '') {
+            const number = parseFloat(numericPart);
+            return '$' + number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        return stringValue; // Return as-is if can't parse
+    }
+    
+    // Remove any existing currency symbols and whitespace for parsing
+    const cleanValue = stringValue.replace(/[$,\s]/g, '');
+    
+    // Check if it's a valid number
+    if (isNaN(cleanValue) || cleanValue === '') {
+        return stringValue; // Return original if not a number
+    }
+    
+    // Format as currency
+    const number = parseFloat(cleanValue);
+    if (number === 0) return '$0.00';
+    
+    return '$' + number.toLocaleString('en-US', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+    });
+}
+
+// Parse currency value to number (removes $ and commas)
+function parseCurrency(value) {
+    if (!value || value.toString().trim() === '') return 0;
+    const cleanValue = value.toString().replace(/[$,\s]/g, '');
+    return parseFloat(cleanValue) || 0;
+}
+
+// Debug function to test column mapping
+function debugColumnMapping() {
+    console.log('🔍 DEBUG: Testing column mapping...');
+    const mapping = getCurrentColumnMapping();
+    console.log('🔍 DEBUG: Column mapping result:', mapping);
+    
+    const dynamic = createDynamicLineItemMapping();
+    console.log('🔍 DEBUG: Dynamic line item mapping:', dynamic);
+    
+    return { mapping, dynamic };
+}
+
 // Export utilities for use in other modules
 window.UTILS = {
     FIELD_MAPPING,
     getCurrentColumnMapping,
     validateAllFields,
     getFieldValues,
-    getLineItems
+    getLineItems,
+    formatCurrency,
+    parseCurrency,
+    findFieldByLabel,
+    getLineItemEditableField,
+    createDynamicLineItemMapping,
+    getDynamicFieldMapping,
+    debugColumnMapping
+};
+
+// Global currency formatter for use across all modules
+window.CURRENCY_FORMATTER = {
+    format: formatCurrency,
+    parse: parseCurrency
 };

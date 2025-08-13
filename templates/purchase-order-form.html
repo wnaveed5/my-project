@@ -1,28 +1,28 @@
 <!-- Purchase Order Form Template -->
 <table class="container">
     <tr>
-        <td style="padding: 30px;">
-            <!-- Header Section -->
-            <table style="width: 100%; margin-bottom: 30px;">
-                <tr>
-                    <td style="width: 60%; vertical-align: top;">
+        <td style="padding: 40px 50px;">
+            <!-- Header Section - Now Draggable -->
+            <table class="header-section" style="width: 100%; margin-bottom: 40px;" data-draggable="true">
+                <tr class="draggable-header-row">
+                    <td class="header-cell company-info" style="width: 50%; vertical-align: top;" data-section="company-info">
                         <table style="width: 100%;">
                             <tr>
                                 <td style="padding-top: 15px;">
                                     <table style="width: 100%;">
-                                        <tr><td>Company Name: <span class="editable-field" contenteditable="true" data-placeholder="">Test Company Inc</span></td></tr>
-                                        <tr><td>Street Address: <span class="editable-field" contenteditable="true" data-placeholder="">123 Main Street</span></td></tr>
-                                        <tr><td>City, ST ZIP: <span class="editable-field" contenteditable="true" data-placeholder="">New York, NY 10001</span></td></tr>
-                                        <tr><td>Phone: <span class="editable-field" contenteditable="true" data-placeholder="">(555) 123-4567</span></td></tr>
-                                        <tr><td>Fax: <span class="editable-field" contenteditable="true" data-placeholder="">(555) 123-4568</span></td></tr>
-                                        <tr><td>Website: <span class="editable-field" contenteditable="true" data-placeholder="">www.testcompany.com</span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Company Name: <span class="editable-field" contenteditable="true" data-placeholder="Enter company name"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Street Address: <span class="editable-field" contenteditable="true" data-placeholder="Enter street address"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">City, ST ZIP: <span class="editable-field" contenteditable="true" data-placeholder="City, State ZIP"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Phone: <span class="editable-field" contenteditable="true" data-placeholder="(555) 123-4567"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Fax: <span class="editable-field" contenteditable="true" data-placeholder="(555) 123-4567"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Website: <span class="editable-field" contenteditable="true" data-placeholder="www.example.com"></span></td></tr>
                                     </table>
                                 </td>
                             </tr>
                         </table>
                     </td>
                     
-                    <td style="width: 40%; text-align: center; vertical-align: top;">
+                    <td class="header-cell purchase-order" style="width: 50%; text-align: center; vertical-align: top;" data-section="purchase-order">
                         <table style="width: 100%;">
                             <tr>
                                 <td style="text-align: center; font-size: 32px; font-weight: bold; color: #000000; padding: 10px 0;">
@@ -33,12 +33,12 @@
                                 <td style="padding-top: 10px;">
                                     <table style="width: 100%;">
                                         <tr>
-                                            <td style="text-align: right; padding-right: 10px; font-weight: bold; font-size: 12px;">DATE:</td>
-                                            <td style="font-size: 12px;"><span class="editable-field" contenteditable="true" data-placeholder="">2024-12-19</span></td>
+                                            <td style="text-align: right; padding-right: 10px; padding: 8px 10px 8px 0; font-weight: bold; font-size: 12px;">DATE:</td>
+                                            <td style="font-size: 12px; padding: 8px 0;"><span class="editable-field" contenteditable="true" data-placeholder="MM/DD/YYYY"></span></td>
                                         </tr>
                                         <tr>
-                                            <td style="text-align: right; padding-right: 10px; font-weight: bold; font-size: 12px;">PO #:</td>
-                                            <td style="font-size: 12px;"><span class="editable-field" contenteditable="true" data-placeholder="">PO-001</span></td>
+                                            <td style="text-align: right; padding-right: 10px; padding: 8px 10px 8px 0; font-weight: bold; font-size: 12px;">PO #:</td>
+                                            <td style="font-size: 12px; padding: 8px 0;"><span class="editable-field" contenteditable="true" data-placeholder="PO#123456"></span></td>
                                         </tr>
                                     </table>
                                 </td>
@@ -49,9 +49,9 @@
             </table>
             
             <!-- Vendor and Ship To Section -->
-            <table style="width: 100%; margin-bottom: 30px;">
-                <tr>
-                    <td style="width: 50%; padding-right: 15px; vertical-align: top;">
+            <table style="width: 100%; margin-bottom: 35px;">
+                <tr class="draggable-vendor-row">
+                    <td class="vendor-cell vendor-section" style="width: 50%; padding-right: 20px; vertical-align: top;" data-section="vendor" draggable="true">
                         <table style="width: 100%; border: 1px solid #e5e7eb;">
                             <tr>
                                 <td class="section-header">VENDOR</td>
@@ -59,19 +59,19 @@
                             <tr>
                                 <td style="padding: 15px;">
                                     <table style="width: 100%;">
-                                        <tr><td>Company Name: <span class="editable-field" contenteditable="true" data-placeholder="">ABC Supplies Ltd</span></td></tr>
-                                        <tr><td>Contact or Department: <span class="editable-field" contenteditable="true" data-placeholder="">Procurement Dept</span></td></tr>
-                                        <tr><td>Street Address: <span class="editable-field" contenteditable="true" data-placeholder="">456 Vendor Street</span></td></tr>
-                                        <tr><td>City, ST ZIP: <span class="editable-field" contenteditable="true" data-placeholder="">Los Angeles, CA 90210</span></td></tr>
-                                        <tr><td>Phone: <span class="editable-field" contenteditable="true" data-placeholder="">(310) 555-0123</span></td></tr>
-                                        <tr><td>Fax: <span class="editable-field" contenteditable="true" data-placeholder="">(310) 555-0124</span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Company Name: <span class="editable-field" contenteditable="true" data-placeholder="Vendor company name"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Contact or Department: <span class="editable-field" contenteditable="true" data-placeholder="Contact person"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Street Address: <span class="editable-field" contenteditable="true" data-placeholder="Vendor address"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">City, ST ZIP: <span class="editable-field" contenteditable="true" data-placeholder="City, State ZIP"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Phone: <span class="editable-field" contenteditable="true" data-placeholder="(555) 123-4567"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Fax: <span class="editable-field" contenteditable="true" data-placeholder="(555) 123-4567"></span></td></tr>
                                     </table>
                                 </td>
                             </tr>
                         </table>
                     </td>
                     
-                    <td style="width: 50%; padding-left: 15px; vertical-align: top;">
+                    <td class="vendor-cell ship-to-section" style="width: 50%; padding-left: 20px; vertical-align: top;" data-section="ship-to" draggable="true">
                         <table style="width: 100%; border: 1px solid #e5e7eb;">
                             <tr>
                                 <td class="section-header">SHIP TO</td>
@@ -79,11 +79,12 @@
                             <tr>
                                 <td style="padding: 15px;">
                                     <table style="width: 100%;">
-                                        <tr><td>Name: <span class="editable-field" contenteditable="true" data-placeholder="">John Smith</span></td></tr>
-                                        <tr><td>Company Name: <span class="editable-field" contenteditable="true" data-placeholder="">Test Company Inc</span></td></tr>
-                                        <tr><td>Street Address: <span class="editable-field" contenteditable="true" data-placeholder="">123 Main Street</span></td></tr>
-                                        <tr><td>City, ST ZIP: <span class="editable-field" contenteditable="true" data-placeholder="">New York, NY 10001</span></td></tr>
-                                        <tr><td>Phone: <span class="editable-field" contenteditable="true" data-placeholder="">(555) 123-4567</span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Name: <span class="editable-field" contenteditable="true" data-placeholder="Contact name"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Company Name: <span class="editable-field" contenteditable="true" data-placeholder="Shipping company"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Street Address: <span class="editable-field" contenteditable="true" data-placeholder="Shipping address"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">City, ST ZIP: <span class="editable-field" contenteditable="true" data-placeholder="City, State ZIP"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Phone: <span class="editable-field" contenteditable="true" data-placeholder="(555) 123-4567"></span></td></tr>
+                                        <tr><td style="padding: 8px 0;">Fax: <span class="editable-field" contenteditable="true" data-placeholder="(555) 123-4567"></span></td></tr>
                                     </table>
                                 </td>
                             </tr>
@@ -93,119 +94,86 @@
             </table>
             
             <!-- Shipping Details Row -->
-            <table style="width: 100%; margin-bottom: 30px;">
+            <table class="shipping-details" style="width: 100%; margin-bottom: 30px; border: 1px solid #e5e7eb;">
                 <tr>
-                    <td style="width: 25%; padding-right: 7px;">
-                        <table style="width: 100%; border: 1px solid #e5e7eb;">
-                            <tr>
-                                <td class="section-header">REQUISITIONER</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; height: 40px;">
-                                    <span class="editable-field" contenteditable="true" data-placeholder="">Jane Doe</span>
-                                </td>
-                            </tr>
-                        </table>
+                    <td class="section-header" style="width: 25%;">REQUISITIONER</td>
+                    <td class="section-header" style="width: 25%;">SHIP VIA</td>
+                    <td class="section-header" style="width: 25%;">F.O.B.</td>
+                    <td class="section-header" style="width: 25%;">SHIPPING TERMS</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; height: 40px; border-right: 1px solid #e5e7eb;">
+                        <span class="editable-field" contenteditable="true" data-placeholder="Requisitioner name"></span>
                     </td>
-                    
-                    <td style="width: 25%; padding-right: 7px; padding-left: 7px;">
-                        <table style="width: 100%; border: 1px solid #e5e7eb;">
-                            <tr>
-                                <td class="section-header">SHIP VIA</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; height: 40px;">
-                                    <span class="editable-field" contenteditable="true" data-placeholder="">FedEx Ground</span>
-                                </td>
-                            </tr>
-                        </table>
+                    <td style="padding: 10px; height: 40px; border-right: 1px solid #e5e7eb;">
+                        <span class="editable-field" contenteditable="true" data-placeholder="Shipping method"></span>
                     </td>
-                    
-                    <td style="width: 25%; padding-right: 7px; padding-left: 7px;">
-                        <table style="width: 100%; border: 1px solid #e5e7eb;">
-                            <tr>
-                                <td class="section-header">F.O.B.</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; height: 40px;">
-                                    <span class="editable-field" contenteditable="true" data-placeholder="">Origin</span>
-                                </td>
-                            </tr>
-                        </table>
+                    <td style="padding: 10px; height: 40px; border-right: 1px solid #e5e7eb;">
+                        <span class="editable-field" contenteditable="true" data-placeholder="FOB terms"></span>
                     </td>
-                    
-                    <td style="width: 25%; padding-left: 7px;">
-                        <table style="width: 100%; border: 1px solid #e5e7eb;">
-                            <tr>
-                                <td class="section-header">SHIPPING TERMS</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; height: 40px;">
-                                    <span class="editable-field" contenteditable="true" data-placeholder="">Net 30</span>
-                                </td>
-                            </tr>
-                        </table>
+                    <td style="padding: 10px; height: 40px;">
+                        <span class="editable-field" contenteditable="true" data-placeholder="Shipping terms"></span>
                     </td>
                 </tr>
             </table>
             
             <!-- Items Table - NetSuite Compatible Structure -->
-            <table class="itemtable" style="width: 100%; margin-bottom: 30px; border: 1px solid #e5e7eb;">
+            <table class="itemtable" style="width: 100%; margin-bottom: 40px; border: 1px solid #e5e7eb;">
                 <!-- Header Row with NetSuite-style column spans -->
                 <thead>
                     <tr>
-                        <th style="width: 40px; background: #333333; color: white; padding: 12px; font-weight: bold; text-align: center;">::</th>
+                        <th style="width: 40px; background: #333333; color: white; padding: 12px; font-weight: bold; text-align: center; font-size: 10px;"></th>
                         <th colspan="3" style="background: #333333; color: white; padding: 12px; font-weight: bold;">:: Item#</th>
                         <th colspan="12" style="background: #333333; color: white; padding: 12px; font-weight: bold;">:: Description</th>
                         <th colspan="2" align="center" style="background: #333333; color: white; padding: 12px; font-weight: bold;">:: Qty</th>
-                        <th colspan="3" align="right" style="background: #333333; color: white; padding: 12px; font-weight: bold;">:: Unit Price</th>
-                        <th colspan="3" align="right" style="background: #333333; color: white; padding: 12px; font-weight: bold;">:: Total</th>
+                        <th colspan="3" align="right" style="background: #333333; color: white; padding: 12px; font-weight: bold;">:: Rate</th>
+                        <th colspan="3" align="right" style="background: #333333; color: white; padding: 12px; font-weight: bold;">:: Amount</th>
                     </tr>
                 </thead>
                 
                 <!-- Sample Row 1 -->
                 <tr class="draggable-row">
-                    <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%; background: #f8f9fa; cursor: grab; font-weight: bold; color: #666;">::</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%; background: #f8f9fa; cursor: default; font-weight: bold; color: #666; font-size: 10px;"></td>
                     <td colspan="3" style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                        <span class="editable-field" contenteditable="true" data-placeholder="">ITEM-001</span>
+                        <span class="editable-field" contenteditable="true" data-placeholder="Item number"></span>
                     </td>
                     <td colspan="12" style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                        <span class="editable-field" contenteditable="true" data-placeholder="">Office Supplies Package</span>
+                        <span class="editable-field" contenteditable="true" data-placeholder="Item description"></span>
                     </td>
                     <td colspan="2" style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%;">
-                        <span class="editable-field" contenteditable="true" data-placeholder="">25</span>
+                        <span class="editable-field" contenteditable="true" data-placeholder="Qty"></span>
                     </td>
                     <td colspan="3" align="right" style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                        <span class="editable-field" contenteditable="true" data-placeholder="">15.99</span>
+                        <span class="editable-field" contenteditable="true" data-placeholder="$0.00"></span>
                     </td>
                     <td colspan="3" align="right" style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                        <span class="editable-field" contenteditable="true" data-placeholder="">399.75</span>
+                        <span class="editable-field" contenteditable="true" data-placeholder="$0.00"></span>
                     </td>
                 </tr>
                 
                 <!-- Sample Row 2 -->
                 <tr class="draggable-row">
-                    <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%; background: #f8f9fa; cursor: grab; font-weight: bold; color: #666;">::</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%; background: #f8f9fa; cursor: default; font-weight: bold; color: #666; font-size: 10px;"></td>
                     <td colspan="3" style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                        <span class="editable-field" contenteditable="true" data-placeholder="">[45645645]</span>
+                        <span class="editable-field" contenteditable="true" data-placeholder=""></span>
                     </td>
                     <td colspan="12" style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                        <span class="editable-field" contenteditable="true" data-placeholder="">Product ABC</span>
+                        <span class="editable-field" contenteditable="true" data-placeholder=""></span>
                     </td>
                     <td colspan="2" style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%;">
-                        <span class="editable-field" contenteditable="true" data-placeholder="">1</span>
+                        <span class="editable-field" contenteditable="true" data-placeholder=""></span>
                     </td>
                     <td colspan="3" align="right" style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                        <span class="editable-field" contenteditable="true" data-placeholder="">75.00</span>
+                        <span class="editable-field" contenteditable="true" data-placeholder=""></span>
                     </td>
                     <td colspan="3" align="right" style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                        <span class="editable-field" contenteditable="true" data-placeholder="">75.00</span>
+                        <span class="editable-field" contenteditable="true" data-placeholder=""></span>
                     </td>
                 </tr>
                 
                 <!-- Empty Row 3 for Additional Items -->
                 <tr class="draggable-row">
-                    <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%; background: #f8f9fa; cursor: grab; font-weight: bold; color: #666;">::</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%; background: #f8f9fa; cursor: default; font-weight: bold; color: #666; font-size: 10px;"></td>
                     <td colspan="3" style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
                         <span class="editable-field" contenteditable="true" data-placeholder=""></span>
                     </td>
@@ -225,7 +193,7 @@
                 
                 <!-- Empty Row 4 for Additional Items -->
                 <tr class="draggable-row">
-                    <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%; background: #f8f9fa; cursor: grab; font-weight: bold; color: #666;">::</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%; background: #f8f9fa; cursor: default; font-weight: bold; color: #666; font-size: 10px;"></td>
                     <td colspan="3" style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
                         <span class="editable-field" contenteditable="true" data-placeholder=""></span>
                     </td>
@@ -245,7 +213,7 @@
                 
                 <!-- Empty Row 5 for Additional Items -->
                 <tr class="draggable-row">
-                    <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%; background: #f8f9fa; cursor: grab; font-weight: bold; color: #666;">::</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; line-height: 150%; background: #f8f9fa; cursor: default; font-weight: bold; color: #666; font-size: 10px;"></td>
                     <td colspan="3" style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
                         <span class="editable-field" contenteditable="true" data-placeholder=""></span>
                     </td>
@@ -266,46 +234,46 @@
             
             <!-- Summary and Comments Section -->
             <table style="width: 100%; margin-bottom: 30px;">
-                <tr>
-                    <td style="width: 70%; padding-right: 15px; vertical-align: top;">
+                <tr class="draggable-comments-row">
+                    <td class="comments-cell comments-section" style="width: 70%; padding-right: 25px; vertical-align: top;" data-section="comments" draggable="true">
                         <table style="width: 100%; border: 1px solid #e5e7eb;">
                             <tr>
                                 <td class="section-header">Comments or Special Instructions</td>
                             </tr>
                             <tr>
-                                <td style="padding: 15px; height: 120px;">
-                                    <span class="editable-field" contenteditable="true" data-placeholder="" style="display: block; width: 100%; height: 100%;">Please deliver to the main office entrance. Contact John Smith upon arrival.</span>
-                                </td>
+                                                                            <td style="padding: 15px; height: 120px;">
+                                                <span class="editable-field" contenteditable="true" data-placeholder="Enter comments or special instructions..." style="display: block; width: 100%; height: 100%;"></span>
+                                            </td>
                             </tr>
                         </table>
                     </td>
                     
-                    <td style="width: 30%; padding-left: 15px; vertical-align: top;">
+                    <td class="comments-cell totals-section" style="width: 30%; padding-left: 25px; vertical-align: top;" data-section="totals" draggable="true">
                         <table style="width: 100%; border: 1px solid #e5e7eb;">
                             <tr>
                                 <td style="padding: 15px;">
                                     <table style="width: 100%;">
                                         <tr>
-                                            <td style="padding: 5px 0; font-weight: bold; color: #000000;">SUBTOTAL:</td>
-                                            <td style="text-align: right; padding: 5px 0; color: #000000;"><span class="editable-field" contenteditable="true" data-placeholder="">474.75</span></td>
+                                            <td style="padding: 8px 0; font-weight: bold; color: #000000;">SUBTOTAL:</td>
+                                            <td style="text-align: right; padding: 8px 0; color: #000000;"><span class="calculated-field" contenteditable="false" style="background-color: #f8f9fa; padding: 3px 6px; border-radius: 3px; border: 1px solid #e9ecef;" data-placeholder=""></span></td>
                                         </tr>
                                         <tr>
-                                            <td style="padding: 5px 0; font-weight: bold; color: #000000;">TAX:</td>
-                                            <td style="text-align: right; padding: 5px 0; color: #000000;"><span class="editable-field" contenteditable="true" data-placeholder="">32.98</span></td>
+                                            <td style="padding: 8px 0; font-weight: bold; color: #000000;">TAX:</td>
+                                            <td style="text-align: right; padding: 8px 0; color: #000000;"><span class="editable-field" contenteditable="true" data-placeholder="$0.00"></span></td>
                                         </tr>
                                         <tr>
-                                            <td style="padding: 5px 0; font-weight: bold; color: #000000;">SHIPPING:</td>
-                                            <td style="text-align: right; padding: 5px 0; color: #000000;"><span class="editable-field" contenteditable="true" data-placeholder="">25.00</span></td>
+                                            <td style="padding: 8px 0; font-weight: bold; color: #000000;">SHIPPING:</td>
+                                            <td style="text-align: right; padding: 8px 0; color: #000000;"><span class="editable-field" contenteditable="true" data-placeholder="$0.00"></span></td>
                                         </tr>
                                         <tr>
-                                            <td style="padding: 5px 0; font-weight: bold; color: #000000;">OTHER:</td>
-                                            <td style="text-align: right; padding: 5px 0; color: #000000;"><span class="editable-field" contenteditable="true" data-placeholder="">0.00</span></td>
+                                            <td style="padding: 8px 0; font-weight: bold; color: #000000;">OTHER:</td>
+                                            <td style="text-align: right; padding: 8px 0; color: #000000;"><span class="editable-field" contenteditable="true" data-placeholder="$0.00"></span></td>
                                         </tr>
                                         <tr>
                                             <td colspan="2" style="padding-top: 15px;">
                                 <table style="width: 100%; text-align: center; color: #000000;">
                                     <tr>
-                                        <td>TOTAL: $<span class="editable-field total-field" contenteditable="true" data-placeholder="">532.73</span></td>
+                                        <td>TOTAL: <span class="calculated-field total-field" contenteditable="false" style="background-color: #f8f9fa; padding: 3px 6px; border-radius: 3px; border: 1px solid #e9ecef; font-weight: bold;" data-placeholder=""></span></td>
                                     </tr>
                                 </table>
                             </td>
@@ -323,7 +291,7 @@
                 <tr>
                     <td style="text-align: center; padding: 20px;">
                         <strong>Contact Information:</strong><br />
-                        <span class="editable-field" contenteditable="true" data-placeholder="Enter contact information here">For questions about this purchase order, please contact the procurement department at (555) 123-4567 or email procurement@testcompany.com</span>
+                        <span class="editable-field" contenteditable="true" data-placeholder="Enter contact information here"></span>
                     </td>
                 </tr>
             </table>

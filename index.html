@@ -3,19 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gimbooks Purchase Order Generator</title>
+    <title>Purchase Order Generator</title>
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
+    <!-- Color Picker Component - positioned on gray background -->
+    <div id="color-picker-root"></div>
+    
     <div id="app">
         <!-- Purchase Order Form will be loaded here -->
     </div>
     
+    <!-- React CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
     <!-- Scripts -->
+    <script src="config.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/dragAndDrop.js"></script>
     <script src="js/calculations.js"></script>
     <script src="js/xmlGenerator.js"></script>
+    <script src="js/VanillaColorPicker.js"></script>
+    <script src="js/ColorPicker.js"></script>
+    <script src="js/ForceColorPicker.js"></script>
+    <script src="js/DataGenerator.js"></script>
+    <script src="js/ChatGPTGenerator.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

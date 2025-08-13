@@ -86,7 +86,7 @@ function initializeAllFeatures() {
     
     // Initialize drag and drop functionality
     if (window.DRAG_AND_DROP) {
-        window.DRAG_AND_DROP.initializeDragAndDrop();
+        window.DRAG_AND_DROP.init();
         window.DRAG_AND_DROP.updateLineItemIDs();
         window.DRAG_AND_DROP.updateColumnIDs();
     }
@@ -99,7 +99,28 @@ function initializeAllFeatures() {
     // Initialize event listeners
     initializeEventListeners();
     
+    // Initialize color picker
+    console.log('🎨 About to initialize color picker...');
+    initializeColorPicker();
+    
+    // Skip local data generator - using ChatGPT only
+    
+    // Initialize ChatGPT generator
+    initializeChatGPTGenerator();
+    
     console.log('✅ All features initialized');
+    
+    // Force color picker after a short delay as fallback
+    setTimeout(() => {
+        if (!document.querySelector('.color-picker-container')) {
+            console.log('🎨 Color picker not found, forcing vanilla version...');
+            if (window.mountVanillaColorPicker) {
+                window.mountVanillaColorPicker();
+            } else {
+                console.error('❌ mountVanillaColorPicker function not available');
+            }
+        }
+    }, 1000);
 }
 
 // Initialize editable fields with event handlers
@@ -172,6 +193,55 @@ function initializeEventListeners() {
     };
     
     console.log('✅ Event listeners initialized');
+}
+
+// Initialize the color picker component
+function initializeColorPicker() {
+    console.log('🎨 Initializing color picker...');
+    
+    // Try React first
+    if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined' && window.mountColorPicker) {
+        console.log('✅ React is available, trying React color picker...');
+        
+        const colorPickerRoot = document.getElementById('color-picker-root');
+        if (colorPickerRoot) {
+            try {
+                window.mountColorPicker();
+                console.log('✅ React color picker initialized');
+                return;
+            } catch (error) {
+                console.warn('⚠️ React color picker failed, falling back to vanilla:', error);
+            }
+        }
+    }
+    
+    // Fallback to vanilla JavaScript
+    console.log('🎨 Using vanilla JavaScript color picker...');
+    if (window.mountVanillaColorPicker) {
+        window.mountVanillaColorPicker();
+        console.log('✅ Vanilla color picker initialized');
+    } else {
+        console.warn('⚠️ Vanilla color picker not available, retrying...');
+        setTimeout(initializeColorPicker, 100);
+    }
+}
+
+// Data generator functions removed - using ChatGPT only
+
+// Initialize the ChatGPT generator
+function initializeChatGPTGenerator() {
+    console.log('🤖 Initializing ChatGPT generator...');
+    
+    if (window.CHATGPT_GENERATOR) {
+        console.log('✅ ChatGPT generator available');
+        
+        // Create the simple generate button
+        window.CHATGPT_GENERATOR.createGenerateButton();
+        
+        console.log('✅ ChatGPT generator initialized');
+    } else {
+        console.warn('⚠️ ChatGPT generator not available');
+    }
 }
 
 // Show error message to user
@@ -301,6 +371,8 @@ window.MAIN_APP = {
     loadTemplates,
     loadPurchaseOrderForm,
     initializeAllFeatures,
+    initializeColorPicker,
+    initializeChatGPTGenerator,
     showError,
     showSuccess,
     checkModuleAvailability

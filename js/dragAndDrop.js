@@ -3,19 +3,30 @@
 // Row drag and drop variables
 let draggedRow = null;
 let draggedRowIndex = null;
+let currentDropTarget = null;
 
 // Column drag and drop variables
 let draggedColumn = null;
 let draggedColumnIndex = null;
+let currentColumnDropTarget = null;
+
+// Drag state management
+let isDragging = false;
+let dragDebounceTimer = null;
 
 // Initialize drag and drop when page loads
 function initializeDragAndDrop() {
-    initializeRowDragAndDrop();
+    // Row drag and drop disabled - rows are no longer swappable
+    // initializeRowDragAndDrop();
     initializeColumnDragAndDrop();
 }
 
-// Row drag and drop functionality
+// Row drag and drop functionality - DISABLED
+// Rows are no longer swappable to maintain data integrity
 function initializeRowDragAndDrop() {
+    console.log('🚫 Row drag and drop is disabled - rows cannot be swapped');
+    return; // Early return to disable functionality
+    
     const table = document.querySelector('.itemtable tbody');
     if (!table) return;
 
@@ -64,6 +75,8 @@ function handleRowDragStart(e) {
     
     draggedRow = row;
     draggedRowIndex = rowIndex;
+    currentDropTarget = null;
+    
     row.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', row.outerHTML);
@@ -73,21 +86,73 @@ function handleRowDragStart(e) {
 
 function handleRowDragEnd(e) {
     const row = e.target.closest('tr');
+    
+    // Clean up all state and styling
     row.classList.remove('dragging');
+    
+    // Clear any remaining drop zone styling
+    document.querySelectorAll('.drop-zone, .drag-over').forEach(element => {
+        element.classList.remove('drop-zone', 'drag-over');
+    });
+    
+    // Clear debounce timer
+    if (dragDebounceTimer) {
+        clearTimeout(dragDebounceTimer);
+        dragDebounceTimer = null;
+    }
+    
+    // Reset variables
     draggedRow = null;
     draggedRowIndex = null;
+    currentDropTarget = null;
     
     console.log('Drag ended');
 }
 
 function handleRowDragOver(e) {
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Allow drag over even if isDragging isn't set yet
     e.dataTransfer.dropEffect = 'move';
-    e.currentTarget.classList.add('drop-zone', 'drag-over');
+    const targetRow = e.currentTarget;
+    
+    // If no active drag, just allow the event
+    if (!draggedRow) return;
+    
+    // Debounce the drag over event to prevent rapid firing
+    if (dragDebounceTimer) {
+        clearTimeout(dragDebounceTimer);
+    }
+    
+    dragDebounceTimer = setTimeout(() => {
+        // Clear previous drop target styling
+        if (currentDropTarget && currentDropTarget !== targetRow) {
+            currentDropTarget.classList.remove('drop-zone', 'drag-over');
+        }
+        
+        // Only add styling if this is a valid drop target and different from dragged row
+        if (targetRow !== draggedRow) {
+            currentDropTarget = targetRow;
+            targetRow.classList.add('drop-zone', 'drag-over');
+        }
+    }, 50); // 50ms debounce
 }
 
 function handleRowDragLeave(e) {
-    e.currentTarget.classList.remove('drop-over');
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const targetRow = e.currentTarget;
+    
+    // Only remove styling if we're actually leaving this element
+    // Check if the related target is outside this row
+    if (!targetRow.contains(e.relatedTarget)) {
+        targetRow.classList.remove('drop-zone', 'drag-over');
+        if (currentDropTarget === targetRow) {
+            currentDropTarget = null;
+        }
+    }
 }
 
 function handleRowDrop(e) {
@@ -190,6 +255,8 @@ function handleColumnDragStart(e) {
     
     draggedColumn = headerCell;
     draggedColumnIndex = columnIndex;
+    currentColumnDropTarget = null;
+    
     headerCell.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', headerCell.outerHTML);
@@ -199,21 +266,73 @@ function handleColumnDragStart(e) {
 
 function handleColumnDragEnd(e) {
     const headerCell = e.target;
+    
+    // Clean up all state and styling
     headerCell.classList.remove('dragging');
+    
+    // Clear any remaining drop zone styling
+    document.querySelectorAll('.drop-zone, .drag-over').forEach(element => {
+        element.classList.remove('drop-zone', 'drag-over');
+    });
+    
+    // Clear debounce timer
+    if (dragDebounceTimer) {
+        clearTimeout(dragDebounceTimer);
+        dragDebounceTimer = null;
+    }
+    
+    // Reset variables
     draggedColumn = null;
     draggedColumnIndex = null;
+    currentColumnDropTarget = null;
     
     console.log(`✅ Column drag ended`);
 }
 
 function handleColumnDragOver(e) {
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Allow drag over even if isDragging isn't set yet
     e.dataTransfer.dropEffect = 'move';
-    e.currentTarget.classList.add('drop-zone', 'drag-over');
+    const targetHeader = e.currentTarget;
+    
+    // If no active drag, just allow the event
+    if (!draggedColumn) return;
+    
+    // Debounce the drag over event to prevent rapid firing
+    if (dragDebounceTimer) {
+        clearTimeout(dragDebounceTimer);
+    }
+    
+    dragDebounceTimer = setTimeout(() => {
+        // Clear previous drop target styling
+        if (currentColumnDropTarget && currentColumnDropTarget !== targetHeader) {
+            currentColumnDropTarget.classList.remove('drop-zone', 'drag-over');
+        }
+        
+        // Only add styling if this is a valid drop target and different from dragged column
+        if (targetHeader !== draggedColumn) {
+            currentColumnDropTarget = targetHeader;
+            targetHeader.classList.add('drop-zone', 'drag-over');
+        }
+    }, 50); // 50ms debounce
 }
 
 function handleColumnDragLeave(e) {
-    e.currentTarget.classList.remove('drop-over');
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const targetHeader = e.currentTarget;
+    
+    // Only remove styling if we're actually leaving this element
+    // Check if the related target is outside this header
+    if (!targetHeader.contains(e.relatedTarget)) {
+        targetHeader.classList.remove('drop-zone', 'drag-over');
+        if (currentColumnDropTarget === targetHeader) {
+            currentColumnDropTarget = null;
+        }
+    }
 }
 
 function handleColumnDrop(e) {
@@ -394,13 +513,877 @@ function removeColumn() {
 
 // Export drag and drop functionality
 window.DRAG_AND_DROP = {
-    initializeDragAndDrop,
-    initializeRowDragAndDrop,
-    initializeColumnDragAndDrop,
-    swapRows,
-    swapColumns,
-    updateLineItemIDs,
-    updateColumnIDs,
-    addColumn,
-    removeColumn
+    // Initialize drag and drop functionality
+    init: function() {
+        console.log('🚀 Initializing drag and drop functionality...');
+        this.initHeaderDragAndDrop();
+        this.initVendorDragAndDrop();
+        this.initCommentsDragAndDrop();
+        initializeColumnDragAndDrop();
+        initializeRowDragAndDrop();
+        console.log('✅ Drag and drop initialized');
+    },
+
+    // Initialize header section drag and drop (Sections 1 & 2)
+    initHeaderDragAndDrop: function() {
+        console.log('🔧 Initializing header section drag and drop...');
+        
+        const headerCells = document.querySelectorAll('.header-cell');
+        if (headerCells.length === 0) {
+            console.log('⚠️ Header cells not found, skipping header drag and drop');
+            return;
+        }
+
+        // Add drag event listeners to each header cell
+        headerCells.forEach(cell => {
+            cell.addEventListener('dragstart', this.handleHeaderDragStart.bind(this));
+            cell.addEventListener('dragend', this.handleHeaderDragEnd.bind(this));
+            cell.addEventListener('dragover', this.handleHeaderDragOver.bind(this));
+            cell.addEventListener('dragleave', this.handleHeaderDragLeave.bind(this));
+            cell.addEventListener('drop', this.handleHeaderDrop.bind(this));
+            
+            // Make each header cell draggable
+            cell.setAttribute('draggable', 'true');
+        });
+        
+        console.log('✅ Header section drag and drop initialized');
+        
+        // Set initial padding for proper alignment
+        const headerRow = document.querySelector('.draggable-header-row');
+        if (headerRow) {
+            this.updateHeaderCellPadding(headerRow);
+        }
+    },
+
+    // Initialize vendor section drag and drop (Sections 3 & 4)
+    initVendorDragAndDrop: function() {
+        console.log('🔧 Initializing vendor section drag and drop...');
+        
+        const vendorCells = document.querySelectorAll('.vendor-cell');
+        console.log(`🔍 Found ${vendorCells.length} vendor cells:`, vendorCells);
+        if (vendorCells.length === 0) {
+            console.log('⚠️ Vendor cells not found, skipping vendor drag and drop');
+            return;
+        }
+
+        // Add drag event listeners to each vendor cell
+        vendorCells.forEach(cell => {
+            cell.addEventListener('dragstart', this.handleVendorDragStart.bind(this));
+            cell.addEventListener('dragend', this.handleVendorDragEnd.bind(this));
+            cell.addEventListener('dragover', this.handleVendorDragOver.bind(this));
+            cell.addEventListener('dragleave', this.handleVendorDragLeave.bind(this));
+            cell.addEventListener('drop', this.handleVendorDrop.bind(this));
+            
+            // Make each vendor cell draggable
+            cell.setAttribute('draggable', 'true');
+        });
+        
+        console.log('✅ Vendor section drag and drop initialized');
+        
+        // Set initial padding for proper alignment
+        const vendorRow = document.querySelector('.draggable-vendor-row');
+        if (vendorRow) {
+            this.updateVendorCellPadding(vendorRow);
+        }
+    },
+
+    // Initialize comments section drag and drop (Comments & Totals)
+    initCommentsDragAndDrop: function() {
+        console.log('🔧 Initializing comments section drag and drop...');
+        
+        const commentsCells = document.querySelectorAll('.comments-cell');
+        console.log(`🔍 Found ${commentsCells.length} comments cells:`, commentsCells);
+        if (commentsCells.length === 0) {
+            console.log('⚠️ Comments cells not found, skipping comments drag and drop');
+            return;
+        }
+
+        // Add drag event listeners to each comments cell
+        commentsCells.forEach(cell => {
+            cell.addEventListener('dragstart', this.handleCommentsDragStart.bind(this));
+            cell.addEventListener('dragend', this.handleCommentsDragEnd.bind(this));
+            cell.addEventListener('dragover', this.handleCommentsDragOver.bind(this));
+            cell.addEventListener('dragleave', this.handleCommentsDragLeave.bind(this));
+            cell.addEventListener('drop', this.handleCommentsDrop.bind(this));
+            
+            // Make each comments cell draggable
+            cell.setAttribute('draggable', 'true');
+        });
+        
+        console.log('✅ Comments section drag and drop initialized');
+        
+        // Set initial padding for proper alignment
+        const commentsRow = document.querySelector('.draggable-comments-row');
+        if (commentsRow) {
+            this.updateCommentsCellPadding(commentsRow);
+        }
+    },
+
+    // Handle header drag start
+    handleHeaderDragStart: function(e) {
+        console.log('🎯 Header drag started');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', e.target.outerHTML);
+        
+        // Add dragging class for visual feedback
+        e.target.classList.add('dragging');
+        
+        // Store the dragged section info
+        this.draggedHeaderSection = e.target;
+        this.currentHeaderDropTarget = null;
+    },
+
+    // Handle header drag end
+    handleHeaderDragEnd: function(e) {
+        console.log('🏁 Header drag ended');
+        
+        // Clean up all state and styling
+        e.target.classList.remove('dragging');
+        this.draggedHeaderSection = null;
+        this.currentHeaderDropTarget = null;
+        
+        // Clear any remaining drop zone styling
+        document.querySelectorAll('.header-cell').forEach(cell => {
+            cell.classList.remove('drop-zone', 'drag-over');
+        });
+        
+        // Clear debounce timer
+        if (dragDebounceTimer) {
+            clearTimeout(dragDebounceTimer);
+            dragDebounceTimer = null;
+        }
+    },
+
+    // Handle header drag over
+    handleHeaderDragOver: function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Allow drag over even if isDragging isn't set yet
+        e.dataTransfer.dropEffect = 'move';
+        
+        // Find the header cell being dragged over
+        const targetCell = e.target.closest('.header-cell');
+        if (!targetCell) return;
+        
+        // If no active drag, just allow the event
+        if (!this.draggedHeaderSection) return;
+        
+        // Debounce the drag over event to prevent rapid firing
+        if (dragDebounceTimer) {
+            clearTimeout(dragDebounceTimer);
+        }
+        
+        dragDebounceTimer = setTimeout(() => {
+            // Clear previous drop target styling
+            if (this.currentHeaderDropTarget && this.currentHeaderDropTarget !== targetCell) {
+                this.currentHeaderDropTarget.classList.remove('drop-zone', 'drag-over');
+            }
+            
+            // Only add styling if this is a valid drop target and different from dragged section
+            if (targetCell !== this.draggedHeaderSection) {
+                this.currentHeaderDropTarget = targetCell;
+                targetCell.classList.add('drop-zone', 'drag-over');
+            }
+        }, 50); // 50ms debounce
+    },
+
+    // Handle header drag leave
+    handleHeaderDragLeave: function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const targetCell = e.target.closest('.header-cell');
+        if (!targetCell) return;
+        
+        // Only remove styling if we're actually leaving this element
+        // Check if the related target is outside this header cell
+        if (!targetCell.contains(e.relatedTarget)) {
+            targetCell.classList.remove('drop-zone', 'drag-over');
+            if (this.currentHeaderDropTarget === targetCell) {
+                this.currentHeaderDropTarget = null;
+            }
+        }
+    },
+
+    // Handle header drop
+    handleHeaderDrop: function(e) {
+        e.preventDefault();
+        console.log('📥 Header drop event');
+        
+        const targetCell = e.target.closest('.header-cell');
+        if (!targetCell || !this.draggedHeaderSection) return;
+        
+        // Clean up drop zone styling
+        targetCell.classList.remove('drop-zone', 'drag-over');
+        this.currentHeaderDropTarget = null;
+        
+        // Get the parent row
+        const headerRow = targetCell.closest('.draggable-header-row');
+        if (!headerRow) return;
+        
+        // Get all header cells
+        const headerCells = Array.from(headerRow.querySelectorAll('.header-cell'));
+        const draggedCell = this.draggedHeaderSection;
+        const targetIndex = headerCells.indexOf(targetCell);
+        const draggedIndex = headerCells.indexOf(draggedCell);
+        
+        if (targetIndex === -1 || draggedIndex === -1) return;
+        
+        // Swap the cells
+        this.swapHeaderCells(headerRow, draggedIndex, targetIndex);
+        
+        // Update XML preview to reflect new order
+        if (window.XML_GENERATOR && window.XML_GENERATOR.updateXmlPreview) {
+            window.XML_GENERATOR.updateXmlPreview();
+        }
+        
+        console.log('🔄 Header sections swapped successfully');
+        console.log('🔄 XML has been updated to reflect the new header section order!');
+        
+        // Show user feedback
+        if (window.MAIN_APP && window.MAIN_APP.showSuccess) {
+            window.MAIN_APP.showSuccess('Header sections reordered! XML will reflect the new layout.');
+        }
+    },
+
+    // Vendor drag and drop handlers (Sections 3 & 4)
+    handleVendorDragStart: function(e) {
+        console.log('🎯 Vendor drag started');
+        e.dataTransfer.effectAllowed = 'move';
+        this.draggedVendorSection = e.target;
+        e.target.classList.add('dragging');
+        
+        // Get the parent row
+        const vendorRow = e.target.closest('.draggable-vendor-row');
+        if (vendorRow) {
+            vendorRow.classList.add('dragging');
+        }
+    },
+
+    handleVendorDragEnd: function(e) {
+        console.log('🏁 Vendor drag ended');
+        e.target.classList.remove('dragging');
+        
+        // Get the parent row
+        const vendorRow = e.target.closest('.draggable-vendor-row');
+        if (vendorRow) {
+            vendorRow.classList.remove('dragging');
+        }
+        
+        // Clear any remaining drop zone styling more aggressively
+        document.querySelectorAll('.vendor-cell').forEach(cell => {
+            cell.classList.remove('drop-zone', 'drag-over');
+        });
+        
+        // Also clear any general drop zone styling that might be lingering
+        document.querySelectorAll('.drop-zone, .drag-over').forEach(element => {
+            element.classList.remove('drop-zone', 'drag-over');
+        });
+        
+        this.draggedVendorSection = null;
+        this.currentVendorDropTarget = null;
+        
+        // Safety cleanup with a small delay to catch any lingering styles
+        setTimeout(() => {
+            document.querySelectorAll('.vendor-cell.drop-zone, .vendor-cell.drag-over').forEach(cell => {
+                cell.classList.remove('drop-zone', 'drag-over');
+                console.log('🧹 Safety cleanup: Removed lingering drop zone styling from vendor cell');
+            });
+        }, 100);
+        
+        console.log('🧹 All drop zone styling cleared');
+    },
+
+    handleVendorDragOver: function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
+        // Find the vendor cell being dragged over
+        const targetCell = e.target.closest('.vendor-cell');
+        if (!targetCell) return;
+        
+        // If no active drag, just allow the event
+        if (!this.draggedVendorSection) return;
+        
+        // Debounce the drag over event to prevent rapid firing
+        if (this.vendorDragDebounceTimer) {
+            clearTimeout(this.vendorDragDebounceTimer);
+        }
+        
+        this.vendorDragDebounceTimer = setTimeout(() => {
+            // Clear previous drop target styling
+            if (this.currentVendorDropTarget && this.currentVendorDropTarget !== targetCell) {
+                this.currentVendorDropTarget.classList.remove('drop-zone', 'drag-over');
+            }
+            
+            // Only add styling if this is a valid drop target and different from dragged section
+            if (targetCell !== this.draggedVendorSection) {
+                this.currentVendorDropTarget = targetCell;
+                targetCell.classList.add('drop-zone', 'drag-over');
+            }
+        }, 50); // 50ms debounce
+    },
+
+    handleVendorDragLeave: function(e) {
+        e.preventDefault();
+        
+        // Only remove styling if we're really leaving the target
+        const targetCell = e.target.closest('.vendor-cell');
+        if (targetCell && !targetCell.contains(e.relatedTarget)) {
+            console.log('🚪 Vendor drag leaving cell, removing drop zone styling');
+            targetCell.classList.remove('drop-zone', 'drag-over');
+            
+            // Clear current drop target if it's this cell
+            if (this.currentVendorDropTarget === targetCell) {
+                this.currentVendorDropTarget = null;
+            }
+        }
+    },
+
+    handleVendorDrop: function(e) {
+        e.preventDefault();
+        console.log('📥 Vendor drop event');
+        
+        const targetCell = e.target.closest('.vendor-cell');
+        console.log('🎯 Target cell:', targetCell);
+        console.log('🎯 Dragged section:', this.draggedVendorSection);
+        
+        if (!targetCell || !this.draggedVendorSection) {
+            console.log('❌ Missing target cell or dragged section, aborting');
+            return;
+        }
+        
+        // Clean up drop zone styling
+        targetCell.classList.remove('drop-zone', 'drag-over');
+        this.currentVendorDropTarget = null;
+        
+        // Additional cleanup - remove all vendor drop zone styling
+        document.querySelectorAll('.vendor-cell').forEach(cell => {
+            cell.classList.remove('drop-zone', 'drag-over');
+        });
+        
+        // Get the parent row
+        const vendorRow = targetCell.closest('.draggable-vendor-row');
+        console.log('🏠 Vendor row:', vendorRow);
+        if (!vendorRow) {
+            console.log('❌ No vendor row found, aborting');
+            return;
+        }
+        
+        // Get all vendor cells
+        const vendorCells = Array.from(vendorRow.querySelectorAll('.vendor-cell'));
+        console.log('📋 All vendor cells:', vendorCells);
+        const draggedCell = this.draggedVendorSection;
+        const targetIndex = vendorCells.indexOf(targetCell);
+        const draggedIndex = vendorCells.indexOf(draggedCell);
+        
+        console.log('📍 Target index:', targetIndex, 'Dragged index:', draggedIndex);
+        
+        if (targetIndex === -1 || draggedIndex === -1) {
+            console.log('❌ Invalid indices, aborting');
+            return;
+        }
+        
+        if (targetIndex === draggedIndex) {
+            console.log('ℹ️ Same position, no swap needed');
+            return;
+        }
+        
+        // Swap the cells
+        console.log('🔄 Starting vendor cell swap...');
+        this.swapVendorCells(vendorRow, draggedIndex, targetIndex);
+        
+        // Update XML preview to reflect new order
+        if (window.XML_GENERATOR && window.XML_GENERATOR.updateXmlPreview) {
+            window.XML_GENERATOR.updateXmlPreview();
+        }
+        
+        console.log('🔄 Vendor sections swapped successfully');
+        console.log('🔄 XML has been updated to reflect the new vendor section order!');
+        
+        // Show user feedback
+        if (window.MAIN_APP && window.MAIN_APP.showSuccess) {
+            window.MAIN_APP.showSuccess('Vendor sections reordered! XML will reflect the new layout.');
+        }
+    },
+
+    // Comments drag and drop handlers (Comments & Totals)
+    handleCommentsDragStart: function(e) {
+        console.log('🎯 Comments drag started');
+        e.dataTransfer.effectAllowed = 'move';
+        this.draggedCommentsSection = e.target;
+        e.target.classList.add('dragging');
+        
+        // Get the parent row
+        const commentsRow = e.target.closest('.draggable-comments-row');
+        if (commentsRow) {
+            commentsRow.classList.add('dragging');
+        }
+    },
+
+    handleCommentsDragEnd: function(e) {
+        console.log('🏁 Comments drag ended');
+        e.target.classList.remove('dragging');
+        
+        // Get the parent row
+        const commentsRow = e.target.closest('.draggable-comments-row');
+        if (commentsRow) {
+            commentsRow.classList.remove('dragging');
+        }
+        
+        // Clear any remaining drop zone styling more aggressively
+        document.querySelectorAll('.comments-cell').forEach(cell => {
+            cell.classList.remove('drop-zone', 'drag-over');
+        });
+        
+        // Also clear any general drop zone styling that might be lingering
+        document.querySelectorAll('.drop-zone, .drag-over').forEach(element => {
+            element.classList.remove('drop-zone', 'drag-over');
+        });
+        
+        this.draggedCommentsSection = null;
+        this.currentCommentsDropTarget = null;
+        
+        // Safety cleanup with a small delay to catch any lingering styles
+        setTimeout(() => {
+            document.querySelectorAll('.comments-cell.drop-zone, .comments-cell.drag-over').forEach(cell => {
+                cell.classList.remove('drop-zone', 'drag-over');
+                console.log('🧹 Safety cleanup: Removed lingering drop zone styling from comments cell');
+            });
+        }, 100);
+        
+        console.log('🧹 All comments drop zone styling cleared');
+    },
+
+    handleCommentsDragOver: function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
+        // Find the comments cell being dragged over
+        const targetCell = e.target.closest('.comments-cell');
+        if (!targetCell) return;
+        
+        // If no active drag, just allow the event
+        if (!this.draggedCommentsSection) return;
+        
+        // Debounce the drag over event to prevent rapid firing
+        if (this.commentsDragDebounceTimer) {
+            clearTimeout(this.commentsDragDebounceTimer);
+        }
+        
+        this.commentsDragDebounceTimer = setTimeout(() => {
+            // Clear previous drop target styling
+            if (this.currentCommentsDropTarget && this.currentCommentsDropTarget !== targetCell) {
+                this.currentCommentsDropTarget.classList.remove('drop-zone', 'drag-over');
+            }
+            
+            // Only add styling if this is a valid drop target and different from dragged section
+            if (targetCell !== this.draggedCommentsSection) {
+                this.currentCommentsDropTarget = targetCell;
+                targetCell.classList.add('drop-zone', 'drag-over');
+            }
+        }, 50); // 50ms debounce
+    },
+
+    handleCommentsDragLeave: function(e) {
+        e.preventDefault();
+        
+        // Only remove styling if we're really leaving the target
+        const targetCell = e.target.closest('.comments-cell');
+        if (targetCell && !targetCell.contains(e.relatedTarget)) {
+            console.log('🚪 Comments drag leaving cell, removing drop zone styling');
+            targetCell.classList.remove('drop-zone', 'drag-over');
+            
+            // Clear current drop target if it's this cell
+            if (this.currentCommentsDropTarget === targetCell) {
+                this.currentCommentsDropTarget = null;
+            }
+        }
+    },
+
+    handleCommentsDrop: function(e) {
+        e.preventDefault();
+        console.log('📥 Comments drop event');
+        
+        const targetCell = e.target.closest('.comments-cell');
+        console.log('🎯 Target cell:', targetCell);
+        console.log('🎯 Dragged section:', this.draggedCommentsSection);
+        
+        if (!targetCell || !this.draggedCommentsSection) {
+            console.log('❌ Missing target cell or dragged section, aborting');
+            return;
+        }
+        
+        // Clean up drop zone styling
+        targetCell.classList.remove('drop-zone', 'drag-over');
+        this.currentCommentsDropTarget = null;
+        
+        // Additional cleanup - remove all comments drop zone styling
+        document.querySelectorAll('.comments-cell').forEach(cell => {
+            cell.classList.remove('drop-zone', 'drag-over');
+        });
+        
+        // Get the parent row
+        const commentsRow = targetCell.closest('.draggable-comments-row');
+        console.log('🏠 Comments row:', commentsRow);
+        if (!commentsRow) {
+            console.log('❌ No comments row found, aborting');
+            return;
+        }
+        
+        // Get all comments cells
+        const commentsCells = Array.from(commentsRow.querySelectorAll('.comments-cell'));
+        console.log('📋 All comments cells:', commentsCells);
+        const draggedCell = this.draggedCommentsSection;
+        const targetIndex = commentsCells.indexOf(targetCell);
+        const draggedIndex = commentsCells.indexOf(draggedCell);
+        
+        console.log('📍 Target index:', targetIndex, 'Dragged index:', draggedIndex);
+        
+        if (targetIndex === -1 || draggedIndex === -1) {
+            console.log('❌ Invalid indices, aborting');
+            return;
+        }
+        
+        if (targetIndex === draggedIndex) {
+            console.log('ℹ️ Same position, no swap needed');
+            return;
+        }
+        
+        // Swap the cells
+        console.log('🔄 Starting comments cell swap...');
+        this.swapCommentsCells(commentsRow, draggedIndex, targetIndex);
+        
+        // Update XML preview to reflect new order
+        if (window.XML_GENERATOR && window.XML_GENERATOR.updateXmlPreview) {
+            window.XML_GENERATOR.updateXmlPreview();
+        }
+        
+        console.log('🔄 Comments sections swapped successfully');
+        console.log('🔄 XML has been updated to reflect the new comments section order!');
+        
+        // Show user feedback
+        if (window.MAIN_APP && window.MAIN_APP.showSuccess) {
+            window.MAIN_APP.showSuccess('Comments sections reordered! XML will reflect the new layout.');
+        }
+    },
+
+    // Swap header cells
+    swapHeaderCells: function(headerRow, fromIndex, toIndex) {
+        const cells = Array.from(headerRow.querySelectorAll('.header-cell'));
+        
+        if (fromIndex === toIndex) return;
+        
+        // Get the cells to swap
+        const fromCell = cells[fromIndex];
+        const toCell = cells[toIndex];
+        
+        // Store the current order for XML generation
+        this.currentHeaderOrder = {
+            leftSection: fromIndex < toIndex ? fromCell.dataset.section : toCell.dataset.section,
+            rightSection: fromIndex < toIndex ? toCell.dataset.section : fromCell.dataset.section
+        };
+        
+        // Swap the cells in the DOM
+        if (fromIndex < toIndex) {
+            headerRow.insertBefore(fromCell, toCell.nextSibling);
+        } else {
+            headerRow.insertBefore(fromCell, toCell);
+        }
+        
+        // Update data-section attributes to match the actual content after swap
+        const updatedCells = Array.from(headerRow.querySelectorAll('.header-cell'));
+        updatedCells.forEach((cell, index) => {
+            // Determine the correct data-section based on the cell's CSS class
+            if (cell.classList.contains('company-info')) {
+                cell.setAttribute('data-section', 'company-info');
+                console.log(`🔧 Cell ${index}: Set data-section="company-info" (contains company-info class)`);
+            } else if (cell.classList.contains('purchase-order')) {
+                cell.setAttribute('data-section', 'purchase-order');
+                console.log(`🔧 Cell ${index}: Set data-section="purchase-order" (contains purchase-order class)`);
+            }
+        });
+        
+        // Update widths and padding to maintain layout
+        this.updateHeaderCellWidths(headerRow);
+        this.updateHeaderCellPadding(headerRow);
+        
+        console.log('🔄 Header cells swapped:', this.currentHeaderOrder);
+        console.log('🔄 Data-section attributes updated for field mapping');
+    },
+
+    // Update header cell widths after swapping
+    updateHeaderCellWidths: function(headerRow) {
+        const cells = Array.from(headerRow.querySelectorAll('.header-cell'));
+        
+        cells.forEach((cell, index) => {
+            if (cell.classList.contains('company-info')) {
+                cell.style.width = '50%';
+            } else if (cell.classList.contains('purchase-order')) {
+                cell.style.width = '50%';
+            }
+        });
+    },
+
+    // Update header cell padding after swapping to match Vendor/Ship To alignment
+    updateHeaderCellPadding: function(headerRow) {
+        const cells = Array.from(headerRow.querySelectorAll('.header-cell'));
+        
+        cells.forEach((cell, index) => {
+            // Reset padding first
+            cell.style.paddingLeft = '';
+            cell.style.paddingRight = '';
+            
+            // Apply padding based on position
+            if (index === 0) {
+                // Left position - align with Vendor section (padding-right only)
+                cell.style.paddingRight = '20px';
+                console.log(`🔧 Left cell (${cell.dataset.section}): padding-right: 20px`);
+            } else if (index === 1) {
+                // Right position - align with Ship To section (padding-left only)
+                cell.style.paddingLeft = '20px';
+                console.log(`🔧 Right cell (${cell.dataset.section}): padding-left: 20px`);
+            }
+        });
+        
+        console.log('✅ Header cell padding updated for proper alignment');
+    },
+
+    // Swap vendor cells
+    swapVendorCells: function(vendorRow, fromIndex, toIndex) {
+        console.log('🔄 swapVendorCells called with indices:', fromIndex, toIndex);
+        const cells = Array.from(vendorRow.querySelectorAll('.vendor-cell'));
+        console.log('📋 Cells found for swapping:', cells);
+        
+        if (fromIndex === toIndex) {
+            console.log('ℹ️ Same indices, no swap needed');
+            return;
+        }
+        
+        // Get the cells to swap
+        const fromCell = cells[fromIndex];
+        const toCell = cells[toIndex];
+        console.log('🔄 From cell:', fromCell);
+        console.log('🔄 To cell:', toCell);
+        
+        // Store the current order for XML generation
+        this.currentVendorOrder = {
+            leftSection: fromIndex < toIndex ? fromCell.dataset.section : toCell.dataset.section,
+            rightSection: fromIndex < toIndex ? toCell.dataset.section : fromCell.dataset.section
+        };
+        
+        // Swap the cells in the DOM
+        console.log('🔄 About to swap DOM elements...');
+        if (fromIndex < toIndex) {
+            console.log('➡️ Moving from cell after to cell');
+            vendorRow.insertBefore(fromCell, toCell.nextSibling);
+        } else {
+            console.log('⬅️ Moving from cell before to cell');
+            vendorRow.insertBefore(fromCell, toCell);
+        }
+        console.log('✅ DOM elements swapped');
+        
+        // Update data-section attributes to match the actual content after swap
+        const updatedCells = Array.from(vendorRow.querySelectorAll('.vendor-cell'));
+        updatedCells.forEach((cell, index) => {
+            // Determine the correct data-section based on the cell's CSS class
+            if (cell.classList.contains('vendor-section')) {
+                cell.setAttribute('data-section', 'vendor');
+                console.log(`🔧 Cell ${index}: Set data-section="vendor" (contains vendor-section class)`);
+            } else if (cell.classList.contains('ship-to-section')) {
+                cell.setAttribute('data-section', 'ship-to');
+                console.log(`🔧 Cell ${index}: Set data-section="ship-to" (contains ship-to-section class)`);
+            }
+        });
+        
+        // Update widths and padding to maintain layout
+        this.updateVendorCellWidths(vendorRow);
+        this.updateVendorCellPadding(vendorRow);
+        
+        console.log('🔄 Vendor cells swapped:', this.currentVendorOrder);
+        console.log('🔄 Data-section attributes updated for field mapping');
+    },
+
+    // Update vendor cell widths after swapping
+    updateVendorCellWidths: function(vendorRow) {
+        const cells = Array.from(vendorRow.querySelectorAll('.vendor-cell'));
+        
+        cells.forEach((cell, index) => {
+            if (cell.classList.contains('vendor-section')) {
+                cell.style.width = '50%';
+            } else if (cell.classList.contains('ship-to-section')) {
+                cell.style.width = '50%';
+            }
+        });
+    },
+
+    // Update vendor cell padding after swapping to maintain alignment
+    updateVendorCellPadding: function(vendorRow) {
+        const cells = Array.from(vendorRow.querySelectorAll('.vendor-cell'));
+        
+        cells.forEach((cell, index) => {
+            // Reset padding first
+            cell.style.paddingLeft = '';
+            cell.style.paddingRight = '';
+            
+            // Apply padding based on position
+            if (index === 0) {
+                // Left position - padding-right only
+                cell.style.paddingRight = '20px';
+                console.log(`🔧 Left vendor cell (${cell.dataset.section}): padding-right: 20px`);
+            } else if (index === 1) {
+                // Right position - padding-left only  
+                cell.style.paddingLeft = '20px';
+                console.log(`🔧 Right vendor cell (${cell.dataset.section}): padding-left: 20px`);
+            }
+        });
+        
+        console.log('✅ Vendor cell padding updated for proper alignment');
+    },
+
+    // Swap comments cells
+    swapCommentsCells: function(commentsRow, fromIndex, toIndex) {
+        console.log('🔄 swapCommentsCells called with indices:', fromIndex, toIndex);
+        const cells = Array.from(commentsRow.querySelectorAll('.comments-cell'));
+        console.log('📋 Cells found for swapping:', cells);
+        
+        if (fromIndex === toIndex) {
+            console.log('ℹ️ Same indices, no swap needed');
+            return;
+        }
+        
+        // Get the cells to swap
+        const fromCell = cells[fromIndex];
+        const toCell = cells[toIndex];
+        console.log('🔄 From cell:', fromCell);
+        console.log('🔄 To cell:', toCell);
+        
+        // Swap the cells in the DOM first
+        console.log('🔄 About to swap DOM elements...');
+        if (fromIndex < toIndex) {
+            console.log('➡️ Moving from cell after to cell');
+            commentsRow.insertBefore(fromCell, toCell.nextSibling);
+        } else {
+            console.log('⬅️ Moving from cell before to cell');
+            commentsRow.insertBefore(fromCell, toCell);
+        }
+        console.log('✅ DOM elements swapped');
+        
+        // Update data-section attributes to match the actual content after swap
+        const updatedCells = Array.from(commentsRow.querySelectorAll('.comments-cell'));
+        updatedCells.forEach((cell, index) => {
+            // Determine the correct data-section based on the cell's CSS class
+            if (cell.classList.contains('comments-section')) {
+                cell.setAttribute('data-section', 'comments');
+                console.log(`🔧 Cell ${index}: Set data-section="comments" (contains comments-section class)`);
+            } else if (cell.classList.contains('totals-section')) {
+                cell.setAttribute('data-section', 'totals');
+                console.log(`🔧 Cell ${index}: Set data-section="totals" (contains totals-section class)`);
+            }
+        });
+        
+        // NOW read the actual order from the DOM after the swap
+        const finalCells = Array.from(commentsRow.querySelectorAll('.comments-cell'));
+        this.currentCommentsOrder = {
+            leftSection: finalCells[0] ? finalCells[0].dataset.section : 'comments',
+            rightSection: finalCells[1] ? finalCells[1].dataset.section : 'totals'
+        };
+        
+        console.log('🔄 Final comments order after DOM swap:', this.currentCommentsOrder);
+        
+        // Update widths and padding to maintain layout
+        this.updateCommentsCellWidths(commentsRow);
+        this.updateCommentsCellPadding(commentsRow);
+        
+        console.log('🔄 Comments cells swapped:', this.currentCommentsOrder);
+        console.log('🔄 Data-section attributes updated for field mapping');
+    },
+
+    // Update comments cell widths after swapping
+    updateCommentsCellWidths: function(commentsRow) {
+        const cells = Array.from(commentsRow.querySelectorAll('.comments-cell'));
+        
+        cells.forEach((cell, index) => {
+            if (cell.classList.contains('comments-section')) {
+                cell.style.width = '70%';
+            } else if (cell.classList.contains('totals-section')) {
+                cell.style.width = '30%';
+            }
+        });
+    },
+
+    // Update comments cell padding after swapping to maintain alignment
+    updateCommentsCellPadding: function(commentsRow) {
+        const cells = Array.from(commentsRow.querySelectorAll('.comments-cell'));
+        
+        cells.forEach((cell, index) => {
+            // Reset padding first
+            cell.style.paddingLeft = '';
+            cell.style.paddingRight = '';
+            
+            // Apply padding based on position
+            if (index === 0) {
+                // Left position - padding-right only
+                cell.style.paddingRight = '25px';
+                console.log(`🔧 Left comments cell (${cell.dataset.section}): padding-right: 25px`);
+            } else if (index === 1) {
+                // Right position - padding-left only  
+                cell.style.paddingLeft = '25px';
+                console.log(`🔧 Right comments cell (${cell.dataset.section}): padding-left: 25px`);
+            }
+        });
+        
+        console.log('✅ Comments cell padding updated for proper alignment');
+    },
+
+    // Get current vendor order for XML generation
+    getCurrentVendorOrder: function() {
+        if (!this.currentVendorOrder) {
+            // Default order if no swapping has occurred
+            this.currentVendorOrder = {
+                leftSection: 'vendor',
+                rightSection: 'ship-to'
+            };
+        }
+        return this.currentVendorOrder;
+    },
+
+    // Get current comments order for XML generation
+    getCurrentCommentsOrder: function() {
+        if (!this.currentCommentsOrder) {
+            // Default order if no swapping has occurred
+            this.currentCommentsOrder = {
+                leftSection: 'comments',
+                rightSection: 'totals'
+            };
+        }
+        return this.currentCommentsOrder;
+    },
+
+    // Get current header order for XML generation
+    getCurrentHeaderOrder: function() {
+        if (!this.currentHeaderOrder) {
+            // Default order if no swapping has occurred
+            this.currentHeaderOrder = {
+                leftSection: 'company-info',
+                rightSection: 'purchase-order'
+            };
+        }
+        return this.currentHeaderOrder;
+    },
+
+    // Legacy functions for backward compatibility
+    initializeDragAndDrop: function() {
+        console.log('⚠️ Using legacy initializeDragAndDrop - please use init() instead');
+        this.init();
+    },
+    initializeColumnDragAndDrop: initializeColumnDragAndDrop,
+    initializeRowDragAndDrop: initializeRowDragAndDrop, // Note: Row drag and drop is disabled
+    swapRows: swapRows, // Note: Row swapping is disabled
+    swapColumns: swapColumns,
+    updateLineItemIDs: updateLineItemIDs,
+    updateColumnIDs: updateColumnIDs,
+    addColumn: addColumn,
+    removeColumn: removeColumn
 };

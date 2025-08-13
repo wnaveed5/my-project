@@ -9,7 +9,7 @@ function calculateSubtotal() {
     
     totalCells.forEach((cell, index) => {
         const rawText = cell.textContent.trim();
-        const value = parseFloat(rawText.replace(/[$,]/g, '')) || 0;
+        const value = window.CURRENCY_FORMATTER ? window.CURRENCY_FORMATTER.parse(rawText) : parseFloat(rawText.replace(/[$,]/g, '')) || 0;
         subtotal += value;
         rowCount++;
     });
@@ -33,19 +33,19 @@ function calculateTotal() {
             const taxField = cell.nextElementSibling?.querySelector('.editable-field');
             if (taxField) {
                 const rawTax = taxField.textContent.trim();
-                tax = parseFloat(rawTax.replace(/[$,]/g, '')) || 0;
+                tax = window.CURRENCY_FORMATTER ? window.CURRENCY_FORMATTER.parse(rawTax) : parseFloat(rawTax.replace(/[$,]/g, '')) || 0;
             }
         } else if (cellText.includes('SHIPPING:')) {
             const shippingField = cell.nextElementSibling?.querySelector('.editable-field');
             if (shippingField) {
                 const rawShipping = shippingField.textContent.trim();
-                shipping = parseFloat(rawShipping.replace(/[$,]/g, '')) || 0;
+                shipping = window.CURRENCY_FORMATTER ? window.CURRENCY_FORMATTER.parse(rawShipping) : parseFloat(rawShipping.replace(/[$,]/g, '')) || 0;
             }
         } else if (cellText.includes('OTHER:')) {
             const otherField = cell.nextElementSibling?.querySelector('.editable-field');
             if (otherField) {
                 const rawOther = otherField.textContent.trim();
-                other = parseFloat(rawOther.replace(/[$,]/g, '')) || 0;
+                other = window.CURRENCY_FORMATTER ? window.CURRENCY_FORMATTER.parse(rawOther) : parseFloat(rawOther.replace(/[$,]/g, '')) || 0;
             }
         }
     });
@@ -61,6 +61,12 @@ function calculateLineItemAmount(row) {
     // Get current column mapping
     const columnMap = window.UTILS ? window.UTILS.getCurrentColumnMapping() : getCurrentColumnMapping();
     
+    if (!columnMap || columnMap.quantity === undefined || columnMap.unitPrice === undefined || columnMap.total === undefined) {
+        console.warn('Column mapping not available or incomplete, skipping calculation');
+        console.groupEnd();
+        return 0;
+    }
+    
     const quantityField = row.querySelector(`td:nth-child(${columnMap.quantity + 1}) .editable-field`); // Qty column
     const rateField = row.querySelector(`td:nth-child(${columnMap.unitPrice + 1}) .editable-field`); // Unit Price column
     const amountField = row.querySelector(`td:nth-child(${columnMap.total + 1}) .editable-field`); // Total Price column
@@ -74,14 +80,20 @@ function calculateLineItemAmount(row) {
         const rawQty = quantityField.textContent.trim();
         const rawRate = rateField.textContent.trim();
         
-        const quantity = parseFloat(rawQty.replace(/[$,]/g, '')) || 0;
-        const rate = parseFloat(rawRate.replace(/[$,]/g, '')) || 0;
+        const quantity = window.CURRENCY_FORMATTER ? window.CURRENCY_FORMATTER.parse(rawQty) : parseFloat(rawQty.replace(/[$,]/g, '')) || 0;
+        const rate = window.CURRENCY_FORMATTER ? window.CURRENCY_FORMATTER.parse(rawRate) : parseFloat(rawRate.replace(/[$,]/g, '')) || 0;
         const amount = quantity * rate;
         
         console.log(`Calculation: "${rawQty}" × "${rawRate}" = ${quantity} × ${rate} = ${amount}`);
         
-        amountField.textContent = amount.toFixed(2);
-        console.log(`Updated amount field to: ${amount.toFixed(2)}`);
+        // Only set amount if it's greater than 0, otherwise keep empty
+        if (amount > 0) {
+            const formattedAmount = window.CURRENCY_FORMATTER ? window.CURRENCY_FORMATTER.format(amount) : '$' + amount.toFixed(2);
+            amountField.textContent = formattedAmount;
+        } else {
+            amountField.textContent = '';
+        }
+        console.log(`Updated amount field to: ${amountField.textContent}`);
         console.groupEnd();
         return amount;
     } else {
@@ -110,15 +122,31 @@ function updateAllTotals() {
     });
     
     if (subtotalField) {
-        const oldSubtotal = subtotalField.textContent.trim();
         const newSubtotal = calculateSubtotal();
-        subtotalField.textContent = newSubtotal;
+        // Only update if there are actual line items with values > 0
+        const lineItemCells = document.querySelectorAll('table.itemtable tbody tr td:last-child .editable-field');
+        let hasValidLineItems = false;
+        
+        lineItemCells.forEach(cell => {
+            const value = window.CURRENCY_FORMATTER ? window.CURRENCY_FORMATTER.parse(cell.textContent) : parseFloat(cell.textContent.replace(/[$,]/g, '')) || 0;
+            if (value > 0) hasValidLineItems = true;
+        });
+        
+        if (hasValidLineItems && parseFloat(newSubtotal) > 0) {
+            subtotalField.textContent = window.CURRENCY_FORMATTER ? window.CURRENCY_FORMATTER.format(newSubtotal) : '$' + newSubtotal;
+        } else if (!hasValidLineItems) {
+            subtotalField.textContent = ''; // Keep empty if no valid line items
+        }
     }
     
     if (totalField) {
-        const oldTotal = totalField.textContent.trim();
         const newTotal = calculateTotal();
-        totalField.textContent = newTotal;
+        // Only update if there are actual values > 0
+        if (parseFloat(newTotal) > 0) {
+            totalField.textContent = window.CURRENCY_FORMATTER ? window.CURRENCY_FORMATTER.format(newTotal) : '$' + newTotal;
+        } else {
+            totalField.textContent = ''; // Keep empty if no valid total
+        }
     }
 }
 
@@ -133,21 +161,43 @@ function getCurrentColumnMapping() {
         const headerText = header.textContent.replace(/ID:.*$/g, '').trim();
         console.log(`  Column ${index}: "${headerText}"`);
         
-        if (headerText.includes('Item#')) {
+        // Enhanced detection logic with individual checks (not else-if chain)
+        console.log(`    🔍 Checking column ${index}: "${headerText}"`);
+        
+        if (headerText.includes('Item#') || headerText.includes('Item')) {
             columnMap.item = index;
-            console.log(`    → Mapped to 'item' at index ${index}`);
-        } else if (headerText.includes('Description')) {
+            console.log(`    ✅ Mapped to 'item' at index ${index}`);
+        } 
+        
+        if (headerText.includes('Description') || headerText.includes('Desc')) {
             columnMap.description = index;
-            console.log(`    → Mapped to 'description' at index ${index}`);
-        } else if (headerText.includes('Qty')) {
+            console.log(`    ✅ Mapped to 'description' at index ${index}`);
+        } 
+        
+        if (headerText.includes('Qty') || headerText.includes('Quantity')) {
             columnMap.quantity = index;
-            console.log(`    → Mapped to 'quantity' at index ${index}`);
-        } else if (headerText.includes('Unit Price')) {
-            columnMap.unitPrice = index;
-            console.log(`    → Mapped to 'unitPrice' at index ${index}`);
-        } else if (headerText.includes('Total Price')) {
-            columnMap.total = index;
-            console.log(`    → Mapped to 'total' at index ${index}`);
+            console.log(`    ✅ Mapped to 'quantity' at index ${index}`);
+        } 
+        
+        if (headerText.includes('Rate') || headerText.includes('Unit Price') || headerText.includes('RATE') || headerText.includes('Price')) {
+            // Enhanced Rate detection - check for Rate, Unit Price, RATE, or Price
+            columnMap.rate = index;
+            columnMap.unitPrice = index; // legacy alias
+            console.log(`    ✅ Mapped to 'rate' at index ${index}`);
+        } 
+        
+        if (headerText.includes('Amount') || headerText.includes('Total') || headerText.includes('AMOUNT') || headerText.includes('TOTAL')) {
+            // Enhanced Amount detection - check for Amount, Total, AMOUNT, or TOTAL
+            columnMap.amount = index;
+            columnMap.total = index; // legacy alias
+            console.log(`    ✅ Mapped to 'amount' at index ${index}`);
+        }
+        
+        // Check if this column wasn't mapped to anything
+        const mapped = (columnMap.item === index) || (columnMap.description === index) || 
+                      (columnMap.quantity === index) || (columnMap.rate === index) || (columnMap.amount === index);
+        if (!mapped && headerText.trim() !== '') {
+            console.log(`    ❌ No mapping for column ${index} with text "${headerText}"`);
         }
     });
     
@@ -178,6 +228,11 @@ function initializeCalculations() {
                 // Check if this is a quantity or rate field (new column positions)
                 // Get current column mapping
                 const columnMap = window.UTILS ? window.UTILS.getCurrentColumnMapping() : getCurrentColumnMapping();
+                
+                if (!columnMap || columnMap.quantity === undefined || columnMap.unitPrice === undefined || columnMap.total === undefined) {
+                    console.warn('Column mapping not available or incomplete');
+                    return;
+                }
                 
                 const isQuantityField = this.closest('td') === row.querySelector(`td:nth-child(${columnMap.quantity + 1})`); // Qty column
                 const isRateField = this.closest('td') === row.querySelector(`td:nth-child(${columnMap.unitPrice + 1})`); // Unit Price column
@@ -217,16 +272,19 @@ function initializeCalculations() {
             }
             
             // Also update totals if this is a Total Price field
-            const columnMap = window.UTILS ? window.UTILS.getCurrentColumnMapping() : getCurrentColumnMapping();
-            const isTotalPriceField = this.closest('td') === row?.querySelector(`td:nth-child(${columnMap.total + 1})`);
-            if (isTotalPriceField) {
-                updateAllTotals();
+            if (row) {
+                const columnMap = window.UTILS ? window.UTILS.getCurrentColumnMapping() : getCurrentColumnMapping();
+                if (columnMap && columnMap.total !== undefined && !isNaN(columnMap.total)) {
+                    const isTotalPriceField = this.closest('td') === row.querySelector(`td:nth-child(${columnMap.total + 1})`);
+                    if (isTotalPriceField) {
+                        updateAllTotals();
+                    }
+                }
             }
         });
     });
 
-    // Initialize totals on page load
-    updateAllTotals();
+    // Don't auto-calculate on page load - let fields stay empty
 }
 
 // Export calculations functionality
