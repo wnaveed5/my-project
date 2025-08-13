@@ -204,7 +204,22 @@ window.XML_GENERATOR = {
         // Generate comments XML based on current order
         const commentsXml = this.generateCommentsXml(fieldValues, commentsOrder);
         
+        // Get current section order from DOM
+        const sectionOrder = this.getCurrentSectionOrder();
+        console.log('🔍 Final section order for XML:', sectionOrder);
+        
+        // Generate dynamic sections XML
+        const dynamicSectionsXml = this.generateDynamicSectionsXml(fieldValues, {
+            headerXml,
+            vendorXml,
+            lineItemsXml,
+            commentsXml
+        }, sectionOrder);
+        
         // Generate the complete XML
+        // Determine current header block color from DOM (falls back to default)
+        const headerBlockColor = this.getHeaderBlockColorHex();
+
         const xmlContent = `<?xml version="1.0"?><!DOCTYPE pdf PUBLIC "-//big.faceless.org//report" "report-1.1.dtd">
 <pdf>
 <head>
@@ -220,42 +235,21 @@ window.XML_GENERATOR = {
         * { font-family: NotoSans, sans-serif; font-size: 9pt; }
         table { width: 100%; border-collapse: collapse; }
         .header-company { font-size: 14pt; font-weight: bold; }
-        .header-title { font-size: 20pt; font-weight: bold; }
+        .header-title { font-size: 20pt; font-weight: bold; background-color: ${headerBlockColor}; color: #ffffff; padding: 6px; border: 1px solid #000; }
         .header-info { font-size: 10pt; }
-        .section-header { background-color: #f0f0f0; font-weight: bold; padding: 6px; border: 1px solid #000; }
+        .section-header { background-color: ${headerBlockColor}; color: #ffffff; font-weight: bold; padding: 6px; border: 1px solid #000; }
         .section-content { padding: 6px; border: 1px solid #000; vertical-align: top; }
-        .item-header { background-color: #f0f0f0; font-weight: bold; padding: 8px; border: 1px solid #000; }
+        .item-header { background-color: ${headerBlockColor}; color: #ffffff; font-weight: bold; padding: 8px; border: 1px solid #000; }
         .item-cell { padding: 6px; border: 1px solid #000; }
         .total-label { font-weight: bold; padding: 4px; }
         .total-amount { font-weight: bold; padding: 4px; background-color: #ffff99; }
-        .comments-header { background-color: #f0f0f0; font-weight: bold; padding: 6px; border: 1px solid #000; }
+        .comments-header { background-color: ${headerBlockColor}; color: #ffffff; font-weight: bold; padding: 6px; border: 1px solid #000; }
         .comments-content { padding: 6px; border: 1px solid #000; min-height: 40px; }
         .contact-info { font-size: 8pt; }
     </style>
 </head>
 <body padding="0.5in" size="Letter">
-    ${headerXml}
-
-    ${vendorXml}
-
-    <table style="margin-top: 15px;">
-        <tr>
-            <td class="section-header" style="width: 25%;">REQUISITIONER</td>
-            <td class="section-header" style="width: 25%;">SHIP VIA</td>
-            <td class="section-header" style="width: 25%;">F.O.B.</td>
-            <td class="section-header" style="width: 25%;">SHIPPING TERMS</td>
-        </tr>
-        <tr>
-            <td class="section-content">${this.escapeXml(fieldValues.requisitioner || '')}</td>
-            <td class="section-content">${this.escapeXml(fieldValues.shipVia || '')}</td>
-            <td class="section-content">${this.escapeXml(fieldValues.fob || '')}</td>
-            <td class="section-content">${this.escapeXml(fieldValues.shippingTerms || '')}</td>
-        </tr>
-    </table>
-
-    ${lineItemsXml}
-
-    ${commentsXml}
+    ${dynamicSectionsXml}
 
     <table style="margin-top: 20px;">
         <tr>
@@ -278,6 +272,55 @@ window.XML_GENERATOR = {
 
         console.log('✅ XML generation completed');
         return xmlContent;
+    },
+
+    // Read current header block color from DOM and normalize to #RRGGBB
+    getHeaderBlockColorHex: function() {
+        const defaultHex = '#333333';
+
+        // Prefer a section header's background (vendor/ship-to/shipping headers)
+        let sample = document.querySelector('.section-header');
+
+        // Fallback to item table header
+        if (!sample) sample = document.querySelector('.itemtable thead th');
+
+        // Fallback to the PURCHASE ORDER title cell
+        if (!sample) {
+            const tds = document.querySelectorAll('td');
+            for (let i = 0; i < tds.length; i++) {
+                const text = (tds[i].textContent || '').trim().toLowerCase();
+                if (text === 'purchase order') { sample = tds[i]; break; }
+            }
+        }
+
+        if (!sample) return defaultHex;
+
+        const bg = window.getComputedStyle(sample).backgroundColor;
+        const hex = this.rgbStringToHex(bg);
+        return hex || defaultHex;
+    },
+
+    // Convert rgb/rgba string to #RRGGBB
+    rgbStringToHex: function(rgbString) {
+        if (!rgbString) return '';
+        if (rgbString.startsWith('#')) {
+            // Normalize #RGB to #RRGGBB
+            const hex = rgbString.replace(/\s+/g, '').toUpperCase();
+            if (/^#([0-9A-F]{3})$/i.test(hex)) {
+                return '#' + hex.substring(1).split('').map(ch => ch + ch).join('');
+            }
+            if (/^#([0-9A-F]{6})$/i.test(hex)) return hex;
+            return '';
+        }
+        const m = rgbString.match(/rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\)/i);
+        if (!m) return '';
+        const r = Math.max(0, Math.min(255, parseInt(m[1], 10)));
+        const g = Math.max(0, Math.min(255, parseInt(m[2], 10)));
+        const b = Math.max(0, Math.min(255, parseInt(m[3], 10)));
+        const a = m[4] !== undefined ? parseFloat(m[4]) : 1;
+        if (a === 0) return ''; // transparent -> fallback
+        const toHex = (n) => n.toString(16).padStart(2, '0').toUpperCase();
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
     },
 
     // Generate header XML based on current order
@@ -807,6 +850,112 @@ window.XML_GENERATOR = {
         }
     },
 
+    // Get current section order from DOM (vendor and shipping sections)
+    getCurrentSectionOrder: function() {
+        const container = document.querySelector('table.container td');
+        if (!container) {
+            console.log('⚠️ Container not found, using default order');
+            return ['header', 'vendor', 'shipping', 'items', 'comments'];
+        }
+        
+        const sections = [];
+        const children = Array.from(container.children);
+        
+        console.log('🔍 Scanning container children for section order...', children.length, 'children found');
+        
+        children.forEach((child, index) => {
+            console.log(`🔍 Child ${index}:`, child.tagName, child.className);
+            
+            if (child.classList.contains('header-section')) {
+                sections.push('header');
+                console.log('  ✅ Found header section');
+            } else if (child.classList.contains('draggable-vendor-section')) {
+                sections.push('vendor');
+                console.log('  ✅ Found vendor section');
+            } else if (child.classList.contains('draggable-shipping-section')) {
+                sections.push('shipping');
+                console.log('  ✅ Found shipping section');
+            } else if (child.classList.contains('itemtable')) {
+                sections.push('items');
+                console.log('  ✅ Found items section');
+            } else if (child.tagName === 'TABLE' && child.querySelector('.draggable-comments-row')) {
+                sections.push('comments');
+                console.log('  ✅ Found comments section');
+            } else {
+                console.log('  ❓ Unknown section type');
+            }
+        });
+        
+        console.log('🔍 Final detected section order from DOM:', sections);
+        return sections.length > 0 ? sections : ['header', 'vendor', 'shipping', 'items', 'comments'];
+    },
+
+    // Generate sections in dynamic order
+    generateDynamicSectionsXml: function(fieldValues, preGeneratedSections, sectionOrder) {
+        let sectionsXml = '';
+        
+        sectionOrder.forEach(sectionType => {
+            switch(sectionType) {
+                case 'header':
+                    sectionsXml += preGeneratedSections.headerXml + '\n\n';
+                    break;
+                case 'vendor':
+                    sectionsXml += preGeneratedSections.vendorXml + '\n\n';
+                    break;
+                case 'shipping':
+                    sectionsXml += this.generateShippingXml(fieldValues) + '\n\n';
+                    break;
+                case 'items':
+                    sectionsXml += preGeneratedSections.lineItemsXml + '\n\n';
+                    break;
+                case 'comments':
+                    sectionsXml += preGeneratedSections.commentsXml + '\n\n';
+                    break;
+                default:
+                    console.warn(`🔍 Unknown section type: ${sectionType}`);
+            }
+        });
+        
+        return sectionsXml;
+    },
+
+    // Generate shipping section XML
+    generateShippingXml: function(fieldValues) {
+        return `    <table style="margin-top: 15px;">
+        <tr>
+            <td class="section-header" style="width: 25%;">REQUISITIONER</td>
+            <td class="section-header" style="width: 25%;">SHIP VIA</td>
+            <td class="section-header" style="width: 25%;">F.O.B.</td>
+            <td class="section-header" style="width: 25%;">SHIPPING TERMS</td>
+        </tr>
+        <tr>
+            <td class="section-content">${this.escapeXml(fieldValues.requisitioner || '')}</td>
+            <td class="section-content">${this.escapeXml(fieldValues.shipVia || '')}</td>
+            <td class="section-content">${this.escapeXml(fieldValues.fob || '')}</td>
+            <td class="section-content">${this.escapeXml(fieldValues.shippingTerms || '')}</td>
+        </tr>
+    </table>`;
+    },
+
+    // Test function to check section swapping detection
+    testSectionDetection: function() {
+        console.log('🧪 Testing section detection...');
+        const sectionOrder = this.getCurrentSectionOrder();
+        console.log('📋 Current section order:', sectionOrder);
+        
+        // Also test container detection
+        const container = document.querySelector('table.container td');
+        console.log('🔍 Container found:', !!container);
+        if (container) {
+            console.log('🔍 Container children count:', container.children.length);
+            Array.from(container.children).forEach((child, i) => {
+                console.log(`  ${i}: ${child.tagName}.${child.className}`);
+            });
+        }
+        
+        return sectionOrder;
+    },
+
     // Helper function to get current header section order (like getCurrentColumnMapping for tables)
     getCurrentHeaderSectionOrder: function() {
         console.log('🔍 Getting current header section order from DOM...');
@@ -1128,20 +1277,32 @@ window.XML_GENERATOR = {
         // Clean up the contact info text
         let formatted = contactInfo.toString().trim();
         
-        // Handle cases where email and phone are run together
-        // Look for patterns like "email@domain.com or 555-123-4567" or "email@domain.com555-123-4567"
-        const emailPhonePattern = /(\S+@\S+\.\S+)\s*(or\s*)?(\d{3}[-.]?\d{3}[-.]?\d{4})/gi;
+        // Fix spacing issues between words
+        // Replace multiple spaces with single spaces
+        formatted = formatted.replace(/\s+/g, ' ');
         
-        if (emailPhonePattern.test(formatted)) {
-            formatted = formatted.replace(emailPhonePattern, (match, email, orText, phone) => {
-                return `${email}<br/>or ${phone}`;
+        // Handle the specific case: "For inquiries, contact [Name] at [Phone] or [Email]"
+        const contactPattern = /(For inquiries, contact)\s+([^at]+?)\s+at\s+([^or]+?)\s+or\s+(.+)/i;
+        if (contactPattern.test(formatted)) {
+            formatted = formatted.replace(contactPattern, (match, prefix, name, phone, email) => {
+                return `${prefix} ${name.trim()}<br/>at ${phone.trim()}<br/>or ${email.trim()}`;
             });
         } else {
-            // Look for standalone phone numbers that should be on a new line
-            // Pattern for phone numbers at the end of text
-            const phoneAtEndPattern = /(.+)\s+(\d{3}[-.]?\d{3}[-.]?\d{4})$/;
-            if (phoneAtEndPattern.test(formatted)) {
-                formatted = formatted.replace(phoneAtEndPattern, '$1<br/>$2');
+            // Handle cases where email and phone are run together
+            // Look for patterns like "email@domain.com or 555-123-4567" or "email@domain.com555-123-4567"
+            const emailPhonePattern = /(\S+@\S+\.\S+)\s*(or\s*)?(\d{3}[-.]?\d{3}[-.]?\d{4})/gi;
+            
+            if (emailPhonePattern.test(formatted)) {
+                formatted = formatted.replace(emailPhonePattern, (match, email, orText, phone) => {
+                    return `${email}<br/>or ${phone}`;
+                });
+            } else {
+                // Look for standalone phone numbers that should be on a new line
+                // Pattern for phone numbers at the end of text
+                const phoneAtEndPattern = /(.+)\s+(\d{3}[-.]?\d{3}[-.]?\d{4})$/;
+                if (phoneAtEndPattern.test(formatted)) {
+                    formatted = formatted.replace(phoneAtEndPattern, '$1<br/>$2');
+                }
             }
         }
         

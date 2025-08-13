@@ -30,6 +30,7 @@ body {
 .draggable-header-row {
     cursor: grab;
     transition: all 0.2s ease;
+    touch-action: none; /* Prevent scrolling on mobile devices */
 }
 
 .draggable-header-row:hover {
@@ -53,6 +54,7 @@ body {
     cursor: grab;
     border: 1px solid transparent;
     border-radius: 4px;
+    touch-action: none; /* Prevent scrolling on mobile devices */
 }
 
 .header-cell:hover {
@@ -78,6 +80,7 @@ body {
 .draggable-vendor-row {
     cursor: grab;
     transition: all 0.2s ease;
+    touch-action: none; /* Prevent scrolling on mobile devices */
 }
 
 .draggable-vendor-row:hover {
@@ -101,6 +104,7 @@ body {
     cursor: grab;
     border: 1px solid transparent;
     border-radius: 4px;
+    touch-action: none; /* Prevent scrolling on mobile devices */
 }
 
 .vendor-cell:hover {
@@ -126,6 +130,7 @@ body {
 .draggable-comments-row {
     cursor: grab;
     transition: all 0.2s ease;
+    touch-action: none; /* Prevent scrolling on mobile devices */
 }
 
 .draggable-comments-row:hover {
@@ -274,6 +279,100 @@ body {
     font-weight: bold;
     font-size: 14px;
     text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+
+/* Shipping Section Drag and Drop Styles */
+.draggable-shipping-section {
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    width: 100%;
+    overflow: visible;
+    touch-action: none; /* Prevent scrolling on mobile devices */
+}
+
+.draggable-shipping-section:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.shipping-drag-handle {
+    opacity: 1 !important;
+    font-weight: bold;
+    left: -40px;
+    touch-action: none; /* Prevent scrolling on mobile devices */
+}
+
+.shipping-drag-handle:hover {
+    background: #3b82f6 !important;
+    color: white !important;
+    border-color: #3b82f6 !important;
+    transform: translateY(-50%) scale(1.1) !important;
+    cursor: grab !important;
+}
+
+.shipping-drag-handle:active {
+    cursor: grabbing !important;
+    transform: translateY(-50%) scale(0.95) !important;
+}
+
+.draggable-shipping-section.dragging {
+    opacity: 0.7;
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    z-index: 1000;
+    border: 2px dashed #3b82f6;
+}
+
+/* Vendor Section Drag and Drop Styles */
+.draggable-vendor-section {
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    width: 100%;
+    overflow: visible;
+    touch-action: none; /* Prevent scrolling on mobile devices */
+}
+
+.draggable-vendor-section:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.vendor-drag-handle {
+    opacity: 1 !important;
+    font-weight: bold;
+    left: -40px;
+    touch-action: none; /* Prevent scrolling on mobile devices */
+}
+
+.vendor-drag-handle:hover {
+    background: #10b981 !important;
+    color: white !important;
+    border-color: #10b981 !important;
+    transform: translateY(-50%) scale(1.1) !important;
+    cursor: grab !important;
+}
+
+.vendor-drag-handle:active {
+    cursor: grabbing !important;
+    transform: translateY(-50%) scale(0.95) !important;
+}
+
+.draggable-vendor-section.dragging {
+    opacity: 0.7;
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    z-index: 1000;
+    border: 2px dashed #10b981;
+}
+
+/* Drop zone styling for sections that can accept section drops */
+.header-section.drop-zone,
+.draggable-vendor-row.drop-zone,
+.draggable-vendor-section.drop-zone,
+.draggable-shipping-section.drop-zone,
+.itemtable.drop-zone,
+.draggable-comments-row.drop-zone {
+    border: 2px dashed #3b82f6 !important;
+    background-color: rgba(59, 130, 246, 0.1) !important;
 }
 
 /* Drag and Drop Styles */
@@ -508,5 +607,191 @@ body {
     
     body {
         padding: 10px;
+    }
+}
+
+/* Header Color Picker Styles */
+.header-color-picker {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 2px solid #333;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    display: none;
+    font-family: Arial, sans-serif;
+}
+
+.color-picker-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.color-picker-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.color-picker-content {
+    padding: 20px;
+}
+
+.color-section {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+.color-section label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 14px;
+}
+
+.color-inputs {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.color-inputs input[type="color"] {
+    width: 50px;
+    height: 40px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.color-inputs input[type="text"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.color-inputs input[type="text"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.color-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.apply-btn, .reset-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.apply-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.apply-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.reset-btn {
+    background: #6c757d;
+    color: white;
+}
+
+.reset-btn:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+}
+
+.toggle-color-picker-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s;
+    z-index: 9999;
+}
+
+.toggle-color-picker-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .header-color-picker {
+        max-width: 95vw;
+        max-height: 90vh;
+    }
+    
+    .color-inputs {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .color-inputs input[type="color"] {
+        width: 100%;
+        max-width: 100px;
+    }
+    
+    .color-actions {
+        flex-direction: column;
     }
 }

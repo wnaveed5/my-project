@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag and Drop Test - Shipping & Vendor Sections</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .test-section h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #e9ecef;
+            border-left: 4px solid #007bff;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Drag and Drop Test</h1>
+        <p>Testing the ability to swap the shipping section (requester) with the vendor section.</p>
+        
+        <div class="test-section">
+            <h3>Test Controls</h3>
+            <button class="test-button" onclick="testDragAndDrop()">Test Drag & Drop System</button>
+            <button class="test-button" onclick="debugDragAndDrop()">Debug Event Listeners</button>
+            <button class="test-button" onclick="checkElements()">Check HTML Elements</button>
+            <button class="test-button" onclick="testManualDrag()">Test Manual Drag</button>
+            <button class="test-button" onclick="forceSwap()">Force Swap Sections</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test Results</h3>
+            <div id="test-results">
+                <div class="status">Click a test button to see results...</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Instructions</h3>
+            <ol>
+                <li>Click "Test Drag & Drop System" to verify the system is working</li>
+                <li>Click "Debug Event Listeners" to check if events are properly attached</li>
+                <li>Click "Check HTML Elements" to verify the DOM structure</li>
+                <li>Try dragging the shipping section (requester) onto the vendor section</li>
+                <li>Try dragging the vendor section onto the shipping section</li>
+            </ol>
+        </div>
+        
+        <div class="test-section">
+            <h3>Expected Behavior</h3>
+            <ul>
+                <li>✅ Shipping section should be draggable</li>
+                <li>✅ Vendor section should accept drops from shipping</li>
+                <li>✅ Vendor section should be draggable</li>
+                <li>✅ Shipping section should accept drops from vendor</li>
+                <li>✅ Sections should swap positions when dropped</li>
+                <li>✅ XML should update to reflect new order</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Simple test functions
+        function testDragAndDrop() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<div class="status">Testing drag and drop system...</div>';
+            
+            try {
+                if (window.DRAG_AND_DROP && window.DRAG_AND_DROP.test) {
+                    window.DRAG_AND_DROP.test();
+                    results.innerHTML = '<div class="status success">✅ Test completed! Check console for details.</div>';
+                } else {
+                    results.innerHTML = '<div class="status error">❌ DRAG_AND_DROP system not found!</div>';
+                }
+            } catch (error) {
+                results.innerHTML = '<div class="status error">❌ Error during test: ' + error.message + '</div>';
+            }
+        }
+        
+        function debugDragAndDrop() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<div class="status">Debugging drag and drop system...</div>';
+            
+            try {
+                if (window.DRAG_AND_DROP && window.DRAG_AND_DROP.debug) {
+                    window.DRAG_AND_DROP.debug();
+                    results.innerHTML = '<div class="status success">✅ Debug completed! Check console for details.</div>';
+                } else {
+                    results.innerHTML = '<div class="status error">❌ DRAG_AND_DROP debug function not found!</div>';
+                }
+            } catch (error) {
+                results.innerHTML = '<div class="status error">❌ Error during debug: ' + error.message + '</div>';
+            }
+        }
+        
+        function checkElements() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<div class="status">Checking HTML elements...</div>';
+            
+            try {
+                const shippingSection = document.querySelector('.draggable-shipping-section');
+                const vendorSection = document.querySelector('.draggable-vendor-section');
+                
+                let html = '<div class="status">';
+                
+                if (shippingSection) {
+                    html += '<div class="success">✅ Shipping section found</div>';
+                    html += '<div>Classes: ' + shippingSection.className + '</div>';
+                    html += '<div>Draggable: ' + shippingSection.draggable + '</div>';
+                    html += '<div>Dataset: ' + JSON.stringify(shippingSection.dataset) + '</div>';
+                } else {
+                    html += '<div class="error">❌ Shipping section not found</div>';
+                }
+                
+                if (vendorSection) {
+                    html += '<div class="success">✅ Vendor section found</div>';
+                    html += '<div>Classes: ' + vendorSection.className + '</div>';
+                    html += '<div>Draggable: ' + vendorSection.draggable + '</div>';
+                    html += '<div>Dataset: ' + JSON.stringify(vendorSection.dataset) + '</div>';
+                } else {
+                    html += '<div class="error">❌ Vendor section not found</div>';
+                }
+                
+                // Check if DRAG_AND_DROP system is available
+                if (window.DRAG_AND_DROP) {
+                    html += '<div class="success">✅ DRAG_AND_DROP system available</div>';
+                    html += '<div>Functions: ' + Object.keys(window.DRAG_AND_DROP).join(', ') + '</div>';
+                } else {
+                    html += '<div class="error">❌ DRAG_AND_DROP system not available</div>';
+                }
+                
+                html += '</div>';
+                results.innerHTML = html;
+                
+            } catch (error) {
+                results.innerHTML = '<div class="status error">❌ Error checking elements: ' + error.message + '</div>';
+            }
+        }
+        
+        function testManualDrag() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<div class="status">Testing manual drag...</div>';
+            
+            try {
+                const shippingSection = document.querySelector('.draggable-shipping-section');
+                const vendorSection = document.querySelector('.draggable-vendor-section');
+                
+                if (shippingSection && vendorSection) {
+                    // Simulate a drag start
+                    const dragStartEvent = new DragEvent('dragstart', {
+                        bubbles: true,
+                        cancelable: true,
+                        dataTransfer: new DataTransfer()
+                    });
+                    
+                    shippingSection.dispatchEvent(dragStartEvent);
+                    
+                    // Simulate a drag over on vendor section
+                    const dragOverEvent = new DragEvent('dragover', {
+                        bubbles: true,
+                        cancelable: true,
+                        dataTransfer: new DataTransfer()
+                    });
+                    
+                    vendorSection.dispatchEvent(dragOverEvent);
+                    
+                    results.innerHTML = '<div class="status success">✅ Manual drag events dispatched. Check console for results.</div>';
+                } else {
+                    results.innerHTML = '<div class="status error">❌ Missing shipping or vendor section</div>';
+                }
+                
+            } catch (error) {
+                results.innerHTML = '<div class="status error">❌ Error testing manual drag: ' + error.message + '</div>';
+            }
+        }
+        
+        function forceSwap() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<div class="status">Forcing section swap...</div>';
+            
+            try {
+                const shippingSection = document.querySelector('.draggable-shipping-section');
+                const vendorSection = document.querySelector('.draggable-vendor-section');
+                
+                if (shippingSection && vendorSection) {
+                    console.log('🧪 Force swap test starting...');
+                    console.log('🔍 Shipping section:', shippingSection);
+                    console.log('🔍 Vendor section:', vendorSection);
+                    console.log('🔍 Parent container:', shippingSection.parentNode);
+                    
+                    // Get current positions
+                    const container = shippingSection.parentNode;
+                    const children = Array.from(container.children);
+                    const shippingIndex = children.indexOf(shippingSection);
+                    const vendorIndex = children.indexOf(vendorSection);
+                    
+                    console.log('🔍 Before swap - Shipping index:', shippingIndex, 'Vendor index:', vendorIndex);
+                    
+                    // Force swap the sections using simple DOM manipulation
+                    if (shippingIndex < vendorIndex) {
+                        // Shipping is before vendor, move vendor before shipping
+                        container.insertBefore(vendorSection, shippingSection);
+                        console.log('✅ Moved vendor before shipping');
+                    } else {
+                        // Vendor is before shipping, move shipping before vendor
+                        container.insertBefore(shippingSection, vendorSection);
+                        console.log('✅ Moved shipping before vendor');
+                    }
+                    
+                    // Check new positions
+                    const newChildren = Array.from(container.children);
+                    const newShippingIndex = newChildren.indexOf(shippingSection);
+                    const newVendorIndex = newChildren.indexOf(vendorSection);
+                    
+                    console.log('🔍 After swap - Shipping index:', newShippingIndex, 'Vendor index:', newVendorIndex);
+                    
+                    results.innerHTML = '<div class="status success">✅ Sections swapped manually! Check the page to see the new order.</div>';
+                    results.innerHTML += '<div class="status">Before: Shipping at ' + shippingIndex + ', Vendor at ' + vendorIndex + '</div>';
+                    results.innerHTML += '<div class="status">After: Shipping at ' + newShippingIndex + ', Vendor at ' + newVendorIndex + '</div>';
+                } else {
+                    results.innerHTML = '<div class="status error">❌ Missing shipping or vendor section</div>';
+                }
+                
+            } catch (error) {
+                results.innerHTML = '<div class="status error">❌ Error forcing swap: ' + error.message + '</div>';
+                console.error('Force swap error:', error);
+            }
+        }
+        
+        // Auto-test when page loads
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (window.DRAG_AND_DROP) {
+                    document.getElementById('test-results').innerHTML = 
+                        '<div class="status success">✅ DRAG_AND_DROP system loaded successfully!</div>';
+                } else {
+                    document.getElementById('test-results').innerHTML = 
+                        '<div class="status warning">⚠️ DRAG_AND_DROP system not yet loaded. Wait a moment and try again.</div>';
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

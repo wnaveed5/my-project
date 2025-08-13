@@ -3,24 +3,36 @@ class ChatGPTGenerator {
     constructor() {
         this.apiKey = null;
         this.isConfigured = false;
-        this.apiUrl = 'https://api.openai.com/v1/chat/completions';
         this.model = 'gpt-3.5-turbo';
         
-        // Load API key from config
-        this.loadApiKey();
+        // Check if we're on Vercel (production) or local development
+        const hostname = window.location.hostname;
+        const port = window.location.port;
+        const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+        const hasPort = port && port !== '80' && port !== '443';
+        
+        // More explicit Vercel detection - only true if actually on Vercel domains
+        this.isVercel = (hostname.includes('vercel.app') || hostname.includes('vercel.com')) 
+                       && !isLocalhost && !hasPort;
+        
+        // Environment detection complete
+        
+        if (this.isVercel) {
+            // On Vercel, use the serverless function
+            this.apiUrl = '/api/chatgpt';
+            this.isConfigured = true;
+            console.log('✅ ChatGPT configured for Vercel deployment');
+        } else {
+            // Local development - use direct API calls
+            this.apiUrl = 'https://api.openai.com/v1/chat/completions';
+            console.log('✅ ChatGPT configured for local development');
+            this.loadApiKey();
+        }
     }
 
     // Load API key from config
     loadApiKey() {
-        // First try to load from environment variables (for Vercel/production)
-        if (typeof process !== 'undefined' && process.env && process.env.OPENAI_API_KEY) {
-            this.apiKey = process.env.OPENAI_API_KEY;
-            this.isConfigured = true;
-            console.log('✅ OpenAI API key loaded from environment variables');
-            return;
-        }
-        
-        // Second try to load from config file (for local development)
+        // First try to load from config file
         if (window.CONFIG && window.CONFIG.OPENAI_API_KEY && window.CONFIG.OPENAI_API_KEY !== 'your-openai-api-key-here') {
             this.apiKey = window.CONFIG.OPENAI_API_KEY;
             this.isConfigured = true;
@@ -28,15 +40,13 @@ class ChatGPTGenerator {
             return;
         }
         
-        // Third fallback to localStorage for backward compatibility
+        // Fallback to localStorage for backward compatibility
         const storedKey = localStorage.getItem('openai_api_key');
         if (storedKey) {
             this.apiKey = storedKey;
             this.isConfigured = true;
             console.log('✅ OpenAI API key loaded from localStorage (fallback)');
             console.warn('⚠️ Consider moving your API key to config.js for better security');
-        } else {
-            console.log('❌ ChatGPT API key not found in config.js file');
         }
     }
 
@@ -72,7 +82,7 @@ Generate data for these fields:
 - Vendor information (company, contact, address, phone, fax)
 - Ship-to information (name, company, address, phone, fax)
 - Shipping details (requisitioner, ship via, FOB, shipping terms)
-- Line items (5 products with qty, item name, description, unit price, total)
+- Line items (5 products with qty, item name, description, options, unit price, total)
 - Financial totals (subtotal, tax, shipping, other, total)
 - Comments and contact info
 
@@ -135,7 +145,7 @@ Use proper JSON field names matching this structure:
 }`;
     }
 
-    // Call ChatGPT API with retry logic
+    // Call ChatGPT API
     async callChatGPT(industry = 'general business', companyType = 'medium enterprise') {
         if (!this.isConfigured) {
             throw new Error('OpenAI API key not configured. Please set your API key first.');
@@ -146,68 +156,51 @@ Use proper JSON field names matching this structure:
 
         console.log('🤖 Calling ChatGPT API...');
 
-        // Retry logic for network issues
-        const maxRetries = 3;
-        let lastError = null;
-
-        for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            try {
-                console.log(`🔄 Attempt ${attempt}/${maxRetries}...`);
-                
-                const response = await fetch(this.apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${this.apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: this.model,
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: userPrompt }
-                        ],
-                        max_tokens: 2000,
-                        temperature: 0.7
-                    }),
-                    // Add timeout and better error handling
-                    signal: AbortSignal.timeout(30000) // 30 second timeout
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(`OpenAI API Error (${response.status}): ${errorData.error?.message || response.statusText}`);
-                }
-
-                const data = await response.json();
-                const content = data.choices[0]?.message?.content;
-
-                if (!content) {
-                    throw new Error('No content received from ChatGPT');
-                }
-
-                console.log('✅ ChatGPT response received');
-                return this.parseResponse(content);
-
-            } catch (error) {
-                lastError = error;
-                console.error(`❌ ChatGPT API call attempt ${attempt} failed:`, error);
-                
-                // If it's a network error and we have retries left, wait and try again
-                if (attempt < maxRetries && (error.name === 'AbortError' || error.message.includes('Failed to fetch') || error.message.includes('ERR_HTTP2_PROTOCOL_ERROR'))) {
-                    const waitTime = attempt * 2000; // Progressive backoff: 2s, 4s, 6s
-                    console.log(`⏳ Waiting ${waitTime}ms before retry...`);
-                    await new Promise(resolve => setTimeout(resolve, waitTime));
-                    continue;
-                }
-                
-                // If we're out of retries or it's not a retryable error, break
-                break;
+        try {
+            let headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            let requestBody = {
+                model: this.model,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                max_tokens: 2000,
+                temperature: 0.7
+            };
+            
+            // Add Authorization header only for local development
+            if (!this.isVercel) {
+                headers['Authorization'] = `Bearer ${this.apiKey}`;
             }
-        }
+            
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(requestBody)
+            });
 
-        // If we get here, all retries failed
-        console.error('❌ All ChatGPT API attempts failed');
-        throw new Error(`ChatGPT API failed after ${maxRetries} attempts. Last error: ${lastError?.message || 'Unknown error'}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`OpenAI API Error: ${errorData.error?.message || response.statusText}`);
+            }
+
+            const data = await response.json();
+            const content = data.choices[0]?.message?.content;
+
+            if (!content) {
+                throw new Error('No content received from ChatGPT');
+            }
+
+            console.log('✅ ChatGPT response received');
+            return this.parseResponse(content);
+
+        } catch (error) {
+            console.error('❌ ChatGPT API call failed:', error);
+            throw error;
+        }
     }
 
     // Parse ChatGPT response
@@ -243,7 +236,7 @@ Use proper JSON field names matching this structure:
             return data;
         } catch (error) {
             console.error('❌ ChatGPT data generation failed:', error);
-            throw error; // No fallback - use ChatGPT only
+            throw error;
         }
     }
 
@@ -253,56 +246,30 @@ Use proper JSON field names matching this structure:
             const data = await this.generateData(industry, companyType);
             
             console.log('📝 Populating form with ChatGPT data...');
-            console.log('🔍 DEBUG - Raw ChatGPT data received:', data);
             
-            // Temporarily disable auto-calculations to prevent interference
-            const editableFields = document.querySelectorAll('.editable-field');
-            const originalEventListeners = new Map();
-            
-            editableFields.forEach(field => {
-                // Store and remove event listeners temporarily
-                const clonedField = field.cloneNode(true);
-                originalEventListeners.set(field, {
-                    oninput: field.oninput,
-                    onblur: field.onblur
-                });
-                
-                // Clear event listeners
-                field.oninput = null;
-                field.onblur = null;
-            });
-            
-            console.log('⏸️ Temporarily disabled auto-calculations to preserve formatting...');
-            
-            // Use dynamic field mapping that respects current column order
-            if (window.UTILS && window.UTILS.getDynamicFieldMapping) {
-                console.log('🔄 Getting dynamic field mapping to respect current column order...');
-                const fieldMapping = window.UTILS.getDynamicFieldMapping();
+            // Use the existing field mapping from utils.js
+            if (window.UTILS && window.UTILS.FIELD_MAPPING) {
+                const fieldMapping = window.UTILS.FIELD_MAPPING;
                 
                 Object.entries(data).forEach(([fieldName, value]) => {
-                    console.log(`🔍 DEBUG - Processing field: ${fieldName} = "${value}"`);
-                    
                     if (fieldMapping[fieldName]) {
-                        let element = null;
+                        let element;
                         const selector = fieldMapping[fieldName];
                         
-                        // Handle dynamic selectors (same logic as in utils.js)
+                        // Handle dynamic selectors
                         if (selector.startsWith('dynamic:')) {
-                            const parts = selector.split(':');
-                            const command = parts[1];
-                            
-                            if (command === 'findFieldByLabel') {
-                                const labelText = parts[2];
-                                const sectionName = parts[3];
-                                element = window.UTILS.findFieldByLabel(labelText, sectionName);
+                            if (window.UTILS && window.UTILS.findFieldByLabel) {
+                                const parts = selector.split(':');
+                                if (parts.length >= 4) {
+                                    const labelText = parts[2];
+                                    const sectionName = parts[3];
+                                    element = window.UTILS.findFieldByLabel(labelText, sectionName);
+                                }
                             }
                         } else {
                             // Handle regular CSS selectors
                             element = document.querySelector(selector);
                         }
-                        
-                        console.log(`🔍 DEBUG - Selector for ${fieldName}: ${selector}`);
-                        console.log(`🔍 DEBUG - Element found:`, element);
                         
                         if (element) {
                             // Fix double dollar signs to single dollar signs
@@ -311,49 +278,28 @@ Use proper JSON field names matching this structure:
                                 cleanValue = value.replace(/\$\$/g, '$');
                                 console.log(`🔧 Fixed double $ in ${fieldName}: "${value}" → "${cleanValue}"`);
                             }
-                            
-                            // Check if this is a financial field
-                            const isFinancialField = ['subtotal', 'tax', 'shipping', 'other', 'total', 'lineItem1Rate', 'lineItem1Amount', 'lineItem2Rate', 'lineItem2Amount', 'lineItem3Rate', 'lineItem3Amount', 'lineItem4Rate', 'lineItem4Amount', 'lineItem5Rate', 'lineItem5Amount'].includes(fieldName);
-                            if (isFinancialField) {
-                                console.log(`💰 DEBUG - Financial field ${fieldName}: "${cleanValue}"`);
-                            }
-                            
                             element.textContent = cleanValue;
-                            console.log(`✓ Set ${fieldName}: "${cleanValue}"`);
+                            console.log(`✓ Set ${fieldName}: ${cleanValue}`);
                             
-                            // Verify what actually got set
+                            // Debug: Verify the field actually contains the value
                             setTimeout(() => {
-                                const actualValue = element.textContent;
-                                console.log(`🔍 DEBUG - Actual value in DOM for ${fieldName}: "${actualValue}"`);
-                                if (actualValue !== cleanValue) {
-                                    console.warn(`⚠️ Value mismatch! Expected: "${cleanValue}", Got: "${actualValue}"`);
+                                const currentValue = element.textContent;
+                                if (currentValue !== cleanValue) {
+                                    console.warn(`⚠️ Field ${fieldName} value changed! Set: "${cleanValue}" → Current: "${currentValue}"`);
                                 }
                             }, 100);
                         } else {
-                            console.warn(`⚠️ Element not found for ${fieldName}`);
+                            console.warn(`⚠️ Element not found for ${fieldName} with selector: ${selector}`);
                         }
                     } else {
                         console.warn(`⚠️ No mapping found for field: ${fieldName}`);
                     }
                 });
                 
-                // Re-enable event listeners after population
-                setTimeout(() => {
-                    console.log('🔄 Re-enabling auto-calculations...');
-                    editableFields.forEach(field => {
-                        const listeners = originalEventListeners.get(field);
-                        if (listeners) {
-                            field.oninput = listeners.oninput;
-                            field.onblur = listeners.onblur;
-                        }
-                    });
-                    console.log('✅ Auto-calculations re-enabled');
-                }, 500);
-                
                 console.log('✅ Form populated with ChatGPT data successfully');
                 return data;
             } else {
-                throw new Error('UTILS.getDynamicFieldMapping not available');
+                throw new Error('UTILS.FIELD_MAPPING not available');
             }
         } catch (error) {
             console.error('❌ Failed to populate form with ChatGPT data:', error);
@@ -379,22 +325,22 @@ Use proper JSON field names matching this structure:
         
         console.log(`✅ Cleared ${clearedCount} editable fields`);
         
-        // Also use dynamic field mapping as backup to ensure all mapped fields are cleared
-        if (window.UTILS && window.UTILS.getDynamicFieldMapping) {
-            const fieldMapping = window.UTILS.getDynamicFieldMapping();
+        // Also use field mapping as backup to ensure all mapped fields are cleared
+        if (window.UTILS && window.UTILS.FIELD_MAPPING) {
+            const fieldMapping = window.UTILS.FIELD_MAPPING;
             
             Object.entries(fieldMapping).forEach(([fieldName, selector]) => {
-                let element = null;
+                let element;
                 
-                // Handle dynamic selectors (same logic as in population)
+                // Handle dynamic selectors
                 if (selector.startsWith('dynamic:')) {
-                    const parts = selector.split(':');
-                    const command = parts[1];
-                    
-                    if (command === 'findFieldByLabel') {
-                        const labelText = parts[2];
-                        const sectionName = parts[3];
-                        element = window.UTILS.findFieldByLabel(labelText, sectionName);
+                    if (window.UTILS && window.UTILS.findFieldByLabel) {
+                        const parts = selector.split(':');
+                        if (parts.length >= 4) {
+                            const labelText = parts[2];
+                            const sectionName = parts[3];
+                            element = window.UTILS.findFieldByLabel(labelText, sectionName);
+                        }
                     }
                 } else {
                     // Handle regular CSS selectors

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Swap</title>
+</head>
+<body>
+    <h1>Test Swap Function</h1>
+    <div id="container">
+        <div id="shipping" style="background: lightblue; padding: 20px; margin: 10px;">
+            SHIPPING SECTION (Requisitioner)
+        </div>
+        <div id="vendor" style="background: lightgreen; padding: 20px; margin: 10px;">
+            VENDOR SECTION
+        </div>
+        <div id="other" style="background: lightyellow; padding: 20px; margin: 10px;">
+            OTHER SECTION
+        </div>
+    </div>
+    
+    <button onclick="testSwap()">Test Swap</button>
+    
+    <script>
+        function swapSections(section1, section2) {
+            console.log('Swapping:', section1.id, 'with', section2.id);
+            
+            const container = section1.parentNode;
+            
+            // Get the positions before swapping
+            const section1NextSibling = section1.nextSibling;
+            const section2NextSibling = section2.nextSibling;
+            
+            // Create a temporary marker element to hold section1's position
+            const tempMarker = document.createElement('div');
+            tempMarker.style.display = 'none';
+            container.insertBefore(tempMarker, section1);
+            
+            // Move section1 to where section2 is
+            if (section2NextSibling) {
+                container.insertBefore(section1, section2NextSibling);
+            } else {
+                container.appendChild(section1);
+            }
+            
+            // Move section2 to where section1 was (where the temp marker is)
+            container.insertBefore(section2, tempMarker);
+            
+            // Remove the temporary marker
+            container.removeChild(tempMarker);
+            
+            console.log('Swap complete!');
+        }
+        
+        function testSwap() {
+            const shipping = document.getElementById('shipping');
+            const vendor = document.getElementById('vendor');
+            swapSections(shipping, vendor);
+        }
+    </script>
+</body>
+</html>

@@ -16,9 +16,14 @@ let dragDebounceTimer = null;
 
 // Initialize drag and drop when page loads
 function initializeDragAndDrop() {
+    console.log('🚀 Initializing drag and drop system...');
+    
     // Row drag and drop disabled - rows are no longer swappable
     // initializeRowDragAndDrop();
     initializeColumnDragAndDrop();
+    // initializeShippingSectionDragAndDrop(); // Remove this line - using existing system
+    
+    console.log('✅ Basic drag and drop system initialized');
 }
 
 // Row drag and drop functionality - DISABLED
@@ -519,9 +524,151 @@ window.DRAG_AND_DROP = {
         this.initHeaderDragAndDrop();
         this.initVendorDragAndDrop();
         this.initCommentsDragAndDrop();
+        this.initShippingDragAndDrop();
+        this.initVendorSectionDragAndDrop();
+
         initializeColumnDragAndDrop();
         initializeRowDragAndDrop();
+        // initializeShippingSectionDragAndDrop(); // Removed - using existing system
         console.log('✅ Drag and drop initialized');
+    },
+
+    // Test function to verify drag and drop is working
+    test: function() {
+        console.log('🧪 Testing drag and drop system...');
+        
+        const shippingSection = document.querySelector('.draggable-shipping-section');
+        const vendorSection = document.querySelector('.draggable-vendor-section');
+        
+        if (shippingSection) {
+            console.log('✅ Shipping section found and ready for drag');
+            console.log('📍 Shipping section classes:', shippingSection.className);
+            console.log('📍 Shipping section draggable:', shippingSection.draggable);
+            console.log('📍 Shipping section dataset:', shippingSection.dataset);
+        } else {
+            console.log('❌ Shipping section not found');
+        }
+        
+        if (vendorSection) {
+            console.log('✅ Vendor section found and ready for drag');
+            console.log('📍 Vendor section classes:', vendorSection.className);
+            console.log('📍 Vendor section draggable:', vendorSection.draggable);
+            console.log('📍 Vendor section dataset:', vendorSection.dataset);
+        } else {
+            console.log('❌ Vendor section not found');
+        }
+        
+        // Test the existing shipping drag and drop system
+        if (this.initShippingDragAndDrop) {
+            console.log('✅ Shipping drag and drop system available');
+        } else {
+            console.log('❌ Shipping drag and drop system not available');
+        }
+        
+        // Test event listeners
+        console.log('🧪 Testing event listeners...');
+        if (shippingSection) {
+            const dragStartListeners = shippingSection.onDragStart;
+            const dragEndListeners = shippingSection.onDragEnd;
+            console.log('📍 Shipping section event listeners:');
+            console.log('  - onDragStart:', dragStartListeners ? '✅' : '❌');
+            console.log('  - onDragEnd:', dragEndListeners ? '✅' : '❌');
+        }
+        
+        if (vendorSection) {
+            const dragOverListeners = vendorSection.onDragOver;
+            const dropListeners = vendorSection.onDrop;
+            console.log('📍 Vendor section event listeners:');
+            console.log('  - onDragOver:', dragOverListeners ? '✅' : '❌');
+            console.log('  - onDrop:', dropListeners ? '✅' : '❌');
+        }
+        
+        // Test if sections can be found by the drag and drop system
+        console.log('🧪 Testing section detection...');
+        const allDraggableSections = document.querySelectorAll('[draggable="true"]');
+        console.log('📍 All draggable elements:', allDraggableSections.length);
+        allDraggableSections.forEach((section, index) => {
+            console.log(`  ${index + 1}. ${section.className} - draggable: ${section.draggable}`);
+        });
+        
+        console.log('🧪 Drag and drop test complete');
+    },
+
+    // Debug function to check event binding
+    debug: function() {
+        console.log('🔍 Debugging drag and drop system...');
+        
+        const shippingSection = document.querySelector('.draggable-shipping-section');
+        const vendorSection = document.querySelector('.draggable-vendor-section');
+        
+        if (shippingSection) {
+            console.log('✅ Shipping section found and ready for drag');
+            console.log('📍 Shipping section classes:', shippingSection.className);
+            console.log('📍 Shipping section draggable:', shippingSection.draggable);
+            console.log('📍 Shipping section dataset:', shippingSection.dataset);
+        } else {
+            console.log('❌ Shipping section not found');
+        }
+        
+        if (vendorSection) {
+            console.log('✅ Vendor section found and ready for drag');
+            console.log('📍 Vendor section classes:', vendorSection.className);
+            console.log('📍 Vendor section draggable:', vendorSection.draggable);
+            console.log('📍 Vendor section dataset:', vendorSection.dataset);
+            
+            // Check if vendor section has drop event listeners
+            const hasDropListener = vendorSection.onDrop || 
+                vendorSection._dropListeners || 
+                vendorSection._eventListeners;
+            console.log('📍 Vendor section drop listeners:', hasDropListener ? '✅' : '❌');
+        } else {
+            console.log('❌ Vendor section not found');
+        }
+        
+        // Test event listeners
+        console.log('🧪 Testing event listeners...');
+        if (shippingSection) {
+            const dragStartListeners = shippingSection.onDragStart;
+            const dragEndListeners = shippingSection.onDragEnd;
+            console.log('📍 Shipping section event listeners:');
+            console.log('  - onDragStart:', dragStartListeners ? '✅' : '❌');
+            console.log('  - onDragEnd:', dragEndListeners ? '✅' : '❌');
+        }
+        if (vendorSection) {
+            const dragOverListeners = vendorSection.onDragOver;
+            const dropListeners = vendorSection.onDrop;
+            console.log('📍 Vendor section event listeners:');
+            console.log('  - onDragOver:', dragOverListeners ? '✅' : '❌');
+            console.log('  - onDrop:', dropListeners ? '✅' : '❌');
+        }
+        
+        // Test if sections can be found by the drag and drop system
+        console.log('🧪 Testing section detection...');
+        const allDraggableSections = document.querySelectorAll('[draggable="true"]');
+        console.log('📍 All draggable elements:', allDraggableSections.length);
+        allDraggableSections.forEach((section, index) => {
+            console.log(`  ${index + 1}. ${section.className} - draggable: ${section.draggable}`);
+        });
+        
+        // Test drop target binding
+        console.log('🧪 Testing drop target binding...');
+        const dropTargets = document.querySelectorAll('.draggable-vendor-section, .header-section, .itemtable, .draggable-comments-row');
+        console.log('📍 Drop targets found:', dropTargets.length);
+        dropTargets.forEach((target, index) => {
+            console.log(`  ${index + 1}. ${target.className} - ready for drops`);
+        });
+        
+        // Test manual drop event simulation
+        console.log('🧪 Testing manual drop event simulation...');
+        if (shippingSection && vendorSection) {
+            try {
+                const dropEvent = new Event('drop', { bubbles: true, cancelable: true });
+                vendorSection.dispatchEvent(dropEvent);
+                console.log('✅ Drop event simulation successful');
+            } catch (error) {
+                console.log('❌ Drop event simulation failed:', error.message);
+            }
+        }
     },
 
     // Initialize header section drag and drop (Sections 1 & 2)
@@ -616,6 +763,418 @@ window.DRAG_AND_DROP = {
         const commentsRow = document.querySelector('.draggable-comments-row');
         if (commentsRow) {
             this.updateCommentsCellPadding(commentsRow);
+        }
+    },
+
+    // Initialize shipping section drag and drop
+    initShippingDragAndDrop: function() {
+        console.log('🔧 Initializing shipping section drag and drop...');
+        
+        const shippingSection = document.querySelector('.draggable-shipping-section');
+        console.log('🔍 Found shipping section:', shippingSection);
+        
+        if (!shippingSection) {
+            console.log('⚠️ Shipping section not found, skipping shipping drag and drop');
+            console.log('🔍 Available elements with "shipping":', document.querySelectorAll('[class*="shipping"]'));
+            return;
+        }
+
+        // Add drag event listeners to shipping section
+        shippingSection.addEventListener('dragstart', this.handleShippingDragStart.bind(this));
+        shippingSection.addEventListener('dragend', this.handleShippingDragEnd.bind(this));
+        
+        // Make all major sections accept drops from shipping section.
+        // Bind to container level, not individual cells
+        const acceptorSections = document.querySelectorAll(
+            '.header-section, .draggable-vendor-section, .itemtable, .draggable-comments-row'
+        );
+        acceptorSections.forEach(section => {
+            section.addEventListener('dragover', this.handleShippingDragOver.bind(this));
+            section.addEventListener('dragleave', this.handleShippingDragLeave.bind(this));
+            section.addEventListener('drop', this.handleShippingDrop.bind(this));
+            console.log('🔗 Bound drop events to:', section.className);
+        });
+        
+        console.log('✅ Shipping section drag and drop initialized');
+    },
+
+    // Handle shipping drag start
+    handleShippingDragStart: function(e) {
+        console.log('🎯 Shipping drag started');
+        console.log('🎯 Target element:', e.target);
+        console.log('🎯 Current target:', e.currentTarget);
+        
+        const container = e.currentTarget || e.target.closest('.draggable-shipping-section');
+        if (!container) {
+            console.log('❌ No shipping container found');
+            return;
+        }
+        
+        console.log('✅ Found shipping container:', container);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', 'shipping-section');
+        
+        // Add dragging class for visual feedback on the container
+        container.classList.add('dragging');
+        
+        // Always track the top-level shipping container
+        this.draggedShippingSection = container;
+        this.currentShippingDropTarget = null;
+        
+        console.log('✅ Shipping drag started successfully');
+    },
+
+    // Handle shipping drag end
+    handleShippingDragEnd: function(e) {
+        console.log('🏁 Shipping drag ended');
+        
+        // Clean up all state and styling
+        const container = e.currentTarget || e.target.closest('.draggable-shipping-section');
+        if (container) container.classList.remove('dragging');
+        this.draggedShippingSection = null;
+        this.currentShippingDropTarget = null;
+        
+        // Clear any remaining drop zone styling
+        document.querySelectorAll('.header-section, .draggable-vendor-row, .itemtable, .draggable-comments-row').forEach(section => {
+            section.classList.remove('drop-zone', 'drag-over');
+        });
+        
+        console.log('✅ Shipping drag ended and cleaned up');
+    },
+
+    // Handle shipping drag over
+    handleShippingDragOver: function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Allow drag over
+        e.dataTransfer.dropEffect = 'move';
+        
+        const targetSection = e.currentTarget;
+        console.log('🔄 Shipping drag over:', targetSection);
+        console.log('🎯 Target classes:', targetSection.className);
+        
+        // If no active drag, just allow the event
+        if (!this.draggedShippingSection) {
+            console.log('⚠️ No active shipping drag');
+            return;
+        }
+        
+        // Don't allow dropping on itself
+        if (targetSection === this.draggedShippingSection) {
+            console.log('⚠️ Cannot drop on itself');
+            return;
+        }
+        
+        // Track current drop target for styling
+        if (this.currentShippingDropTarget !== targetSection) {
+            // Remove styling from previous target
+            if (this.currentShippingDropTarget) {
+                this.currentShippingDropTarget.classList.remove('drop-zone', 'drag-over');
+            }
+            
+            // Add styling to new target
+            targetSection.classList.add('drop-zone', 'drag-over');
+            this.currentShippingDropTarget = targetSection;
+            
+            console.log('✅ Added drop zone styling to:', targetSection);
+            console.log('🎯 Target is now valid drop zone');
+        }
+    },
+
+    // Handle shipping drag leave
+    handleShippingDragLeave: function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const targetSection = e.currentTarget;
+        
+        // Only remove styling if we're actually leaving this element
+        if (!targetSection.contains(e.relatedTarget)) {
+            targetSection.classList.remove('drop-zone', 'drag-over');
+            if (this.currentShippingDropTarget === targetSection) {
+                this.currentShippingDropTarget = null;
+            }
+        }
+    },
+
+    // Handle shipping drop
+    handleShippingDrop: function(e) {
+        e.preventDefault();
+        console.log('📥 Shipping drop event triggered!');
+        console.log('🎯 Target element:', e.target);
+        console.log('🎯 Current target:', e.currentTarget);
+        console.log('🎯 Dragged shipping section:', this.draggedShippingSection);
+        
+        // Find the closest major section container that can accept drops
+        let targetSection = e.target.closest('.draggable-vendor-section, .header-section, .itemtable, .draggable-comments-row');
+        
+        // If we're dropping on a vendor cell, find its container
+        if (!targetSection && e.target.closest('.vendor-cell, .draggable-vendor-row')) {
+            targetSection = e.target.closest('.draggable-vendor-section');
+        }
+        
+        // If still no target, use the current target
+        if (!targetSection) {
+            targetSection = e.currentTarget;
+        }
+        
+        console.log('🔍 Final target section:', targetSection);
+        console.log('🔍 Target section classes:', targetSection ? targetSection.className : 'null');
+        
+        if (!targetSection || !this.draggedShippingSection) {
+            console.log('❌ Missing target or dragged section');
+            console.log('  - targetSection:', targetSection);
+            console.log('  - draggedShippingSection:', this.draggedShippingSection);
+            return;
+        }
+        
+        // Clean up drop zone styling
+        targetSection.classList.remove('drop-zone', 'drag-over');
+        this.currentShippingDropTarget = null;
+        
+        // Check if we're dropping on the vendor section for a swap
+        if (targetSection.classList.contains('draggable-vendor-section')) {
+            console.log('🔄 Swapping shipping and vendor sections');
+            console.log('🔍 About to swap:');
+            console.log('  - Shipping section:', this.draggedShippingSection);
+            console.log('  - Vendor section:', targetSection);
+            console.log('  - Shipping section parent:', this.draggedShippingSection.parentNode);
+            console.log('  - Vendor section parent:', targetSection.parentNode);
+            
+            this.swapSections(this.draggedShippingSection, targetSection);
+        } else {
+            console.log('📍 Not dropping on vendor section, doing regular positioning');
+            // Regular positioning - insert before target
+            const container = this.draggedShippingSection.parentNode;
+            container.insertBefore(this.draggedShippingSection, targetSection);
+            console.log('🔄 Shipping section moved successfully');
+        }
+        
+        // Update XML to reflect new order
+        console.log('🔄 Updating XML after shipping section swap...');
+        if (window.XML_GENERATOR && window.XML_GENERATOR.updateXmlPreview) {
+            // Test section detection first
+            window.XML_GENERATOR.testSectionDetection();
+            window.XML_GENERATOR.updateXmlPreview();
+            console.log('✅ XML updated after shipping section move');
+        } else {
+            console.warn('⚠️ XML_GENERATOR not available for update');
+        }
+        
+        // Show user feedback
+        if (window.MAIN_APP && window.MAIN_APP.showSuccess) {
+            window.MAIN_APP.showSuccess('Shipping section moved!');
+        }
+    },
+
+    // Swap two sections in the DOM
+    swapSections: function(section1, section2) {
+        console.log('🔄 Swapping sections:', section1.dataset.section, '↔', section2.dataset.section);
+        console.log('🔍 Section 1:', section1);
+        console.log('🔍 Section 2:', section2);
+        
+        // Get parent container
+        const container = section1.parentNode;
+        console.log('🔍 Parent container:', container);
+        
+        // Check if sections are actually different
+        if (section1 === section2) {
+            console.log('⚠️ Cannot swap section with itself');
+            return;
+        }
+        
+        // Get the positions before swapping
+        const section1NextSibling = section1.nextSibling;
+        const section2NextSibling = section2.nextSibling;
+        
+        // Create a temporary marker element to hold section1's position
+        const tempMarker = document.createElement('div');
+        tempMarker.style.display = 'none';
+        container.insertBefore(tempMarker, section1);
+        
+        // Move section1 to where section2 is
+        if (section2NextSibling) {
+            container.insertBefore(section1, section2NextSibling);
+        } else {
+            container.appendChild(section1);
+        }
+        console.log('✅ Moved section1 to section2\'s position');
+        
+        // Move section2 to where section1 was (where the temp marker is)
+        container.insertBefore(section2, tempMarker);
+        console.log('✅ Moved section2 to section1\'s original position');
+        
+        // Remove the temporary marker
+        container.removeChild(tempMarker);
+        
+        // Verify the swap worked
+        const children = Array.from(container.children);
+        const section1Index = children.indexOf(section1);
+        const section2Index = children.indexOf(section2);
+        console.log('🔍 After swap - Section 1 index:', section1Index, 'Section 2 index:', section2Index);
+        
+        console.log('✅ Sections swapped successfully');
+    },
+
+    // Initialize vendor section (whole container) drag and drop
+    initVendorSectionDragAndDrop: function() {
+        console.log('🔧 Initializing vendor section container drag and drop...');
+        
+        const vendorSection = document.querySelector('.draggable-vendor-section');
+        console.log('🔍 Found vendor section container:', vendorSection);
+        
+        if (!vendorSection) {
+            console.log('⚠️ Vendor section container not found, skipping vendor section drag and drop');
+            return;
+        }
+
+        // Add drag event listeners to vendor section container
+        vendorSection.addEventListener('dragstart', this.handleVendorSectionDragStart.bind(this));
+        vendorSection.addEventListener('dragend', this.handleVendorSectionDragEnd.bind(this));
+        
+        // Make all major sections accept drops from vendor section.
+        // Include shipping descendants so dropping anywhere within shipping row works.
+        const acceptorSections = document.querySelectorAll(
+            '.header-section, .draggable-shipping-section, table.shipping-details, .shipping-details td, .itemtable, .draggable-comments-row'
+        );
+        acceptorSections.forEach(section => {
+            section.addEventListener('dragover', this.handleVendorSectionDragOver.bind(this));
+            section.addEventListener('dragleave', this.handleVendorSectionDragLeave.bind(this));
+            section.addEventListener('drop', this.handleVendorSectionDrop.bind(this));
+        });
+        
+        console.log('✅ Vendor section container drag and drop initialized');
+    },
+
+    // Handle vendor section drag start
+    handleVendorSectionDragStart: function(e) {
+        // Only start drag if we're dragging the container handle, not the internal cells
+        if (e.target.classList.contains('vendor-cell') || 
+            e.target.closest('.vendor-cell') || 
+            e.target.classList.contains('draggable-vendor-row')) {
+            e.stopPropagation();
+            return false;
+        }
+        
+        // Only allow dragging from the drag handle or container background
+        if (!e.target.classList.contains('vendor-drag-handle') && 
+            !e.target.classList.contains('draggable-vendor-section')) {
+            return false;
+        }
+        
+        console.log('🎯 Vendor section drag started');
+        const container = e.currentTarget || e.target.closest('.draggable-vendor-section');
+        if (!container) return false;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', 'vendor-section');
+        
+        // Add dragging class for visual feedback
+        container.classList.add('dragging');
+        
+        // Store the dragged vendor section
+        this.draggedVendorSectionContainer = container;
+        this.currentVendorSectionDropTarget = null;
+    },
+
+    // Handle vendor section drag end
+    handleVendorSectionDragEnd: function(e) {
+        console.log('🏁 Vendor section drag ended');
+        
+        // Clean up all state and styling
+        e.target.classList.remove('dragging');
+        this.draggedVendorSectionContainer = null;
+        this.currentVendorSectionDropTarget = null;
+        
+        // Clear any remaining drop zone styling
+        document.querySelectorAll('.header-section, .draggable-shipping-section, .itemtable, .draggable-comments-row').forEach(section => {
+            section.classList.remove('drop-zone', 'drag-over');
+        });
+    },
+
+    // Handle vendor section drag over
+    handleVendorSectionDragOver: function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Allow drag over
+        e.dataTransfer.dropEffect = 'move';
+        
+        const targetSection = e.currentTarget;
+        
+        // If no active drag, just allow the event
+        if (!this.draggedVendorSectionContainer) return;
+        
+        // Don't allow dropping on itself
+        if (targetSection === this.draggedVendorSectionContainer) return;
+        
+        // Clear previous drop target styling
+        if (this.currentVendorSectionDropTarget && this.currentVendorSectionDropTarget !== targetSection) {
+            this.currentVendorSectionDropTarget.classList.remove('drop-zone', 'drag-over');
+        }
+        
+        // Add styling to current drop target
+        this.currentVendorSectionDropTarget = targetSection;
+        targetSection.classList.add('drop-zone', 'drag-over');
+    },
+
+    // Handle vendor section drag leave
+    handleVendorSectionDragLeave: function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const targetSection = e.currentTarget;
+        
+        // Only remove styling if we're actually leaving this element
+        if (!targetSection.contains(e.relatedTarget)) {
+            targetSection.classList.remove('drop-zone', 'drag-over');
+            if (this.currentVendorSectionDropTarget === targetSection) {
+                this.currentVendorSectionDropTarget = null;
+            }
+        }
+    },
+
+    // Handle vendor section drop
+    handleVendorSectionDrop: function(e) {
+        e.preventDefault();
+        console.log('📥 Vendor section drop event');
+        
+        // Normalize target to the closest major section container
+        let targetSection = e.target.closest('.draggable-shipping-section, .header-section, .itemtable, .draggable-comments-row, table.shipping-details, .shipping-details td') || e.currentTarget;
+        if (targetSection && (targetSection.tagName === 'TD' && targetSection.closest('.draggable-shipping-section'))) {
+            targetSection = targetSection.closest('.draggable-shipping-section');
+        }
+        if (!targetSection || !this.draggedVendorSectionContainer) return;
+        
+        // Clean up drop zone styling
+        targetSection.classList.remove('drop-zone', 'drag-over');
+        this.currentVendorSectionDropTarget = null;
+        
+        // Check if we're dropping on the shipping section for a swap
+        if (targetSection.classList.contains('draggable-shipping-section')) {
+            console.log('🔄 Swapping vendor and shipping sections');
+            this.swapSections(this.draggedVendorSectionContainer, targetSection);
+        } else {
+            // Regular positioning - insert before target
+            const container = this.draggedVendorSectionContainer.parentNode;
+            container.insertBefore(this.draggedVendorSectionContainer, targetSection);
+            console.log('🔄 Vendor section moved successfully');
+        }
+        
+        // Update XML to reflect new order
+        console.log('🔄 Updating XML after vendor section swap...');
+        if (window.XML_GENERATOR && window.XML_GENERATOR.updateXmlPreview) {
+            // Test section detection first
+            window.XML_GENERATOR.testSectionDetection();
+            window.XML_GENERATOR.updateXmlPreview();
+            console.log('✅ XML updated after vendor section move');
+        } else {
+            console.warn('⚠️ XML_GENERATOR not available for update');
+        }
+        
+        // Show user feedback
+        if (window.MAIN_APP && window.MAIN_APP.showSuccess) {
+            window.MAIN_APP.showSuccess('Vendor section moved!');
         }
     },
 
@@ -1385,5 +1944,49 @@ window.DRAG_AND_DROP = {
     updateLineItemIDs: updateLineItemIDs,
     updateColumnIDs: updateColumnIDs,
     addColumn: addColumn,
-    removeColumn: removeColumn
+    removeColumn: removeColumn,
+
+    // Test function to force a swap
+    testSwap: function() {
+        console.log('🧪 Testing forced swap...');
+        
+        const shippingSection = document.querySelector('.draggable-shipping-section');
+        const vendorSection = document.querySelector('.draggable-vendor-section');
+        
+        if (!shippingSection || !vendorSection) {
+            console.log('❌ Missing sections for swap test');
+            return false;
+        }
+        
+        console.log('🔍 Before swap:');
+        console.log('  - Shipping section:', shippingSection);
+        console.log('  - Vendor section:', vendorSection);
+        
+        // Get current positions
+        const container = shippingSection.parentNode;
+        const children = Array.from(container.children);
+        const shippingIndex = children.indexOf(shippingSection);
+        const vendorIndex = children.indexOf(vendorSection);
+        
+        console.log('📍 Before swap - Shipping at index:', shippingIndex, 'Vendor at index:', vendorIndex);
+        
+        // Force swap using our swap function
+        this.swapSections(shippingSection, vendorSection);
+        
+        // Check new positions
+        const newChildren = Array.from(container.children);
+        const newShippingIndex = newChildren.indexOf(shippingSection);
+        const newVendorIndex = newChildren.indexOf(vendorSection);
+        
+        console.log('📍 After swap - Shipping at index:', newShippingIndex, 'Vendor at index:', newVendorIndex);
+        
+        if (newShippingIndex !== shippingIndex || newVendorIndex !== vendorIndex) {
+            console.log('✅ Swap test successful! Sections moved.');
+            return true;
+        } else {
+            console.log('❌ Swap test failed! Sections did not move.');
+            return false;
+        }
+    }
 };
+// Updated: Wed Aug 13 18:37:15 CDT 2025
